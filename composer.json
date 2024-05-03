@@ -1,0 +1,21 @@
+{
+    "name": "dotdigital/magento2-hyva-checkout-dotdigitalgroup-sms",
+    "description": "Hyvä Checkout Compatibility module for Dotdigitalgroup_Sms",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "require": {
+        "magento/framework": "*",
+        "hyva-themes/magento2-hyva-checkout": "^1.1.5",
+        "dotdigital/dotdigital-magento2-extension-sms": "^2.2.1",
+        "hyva-themes/magento2-dotdigitalgroup-sms": "^1.0.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "files": [
+            "src/registration.php"
+        ],
+        "psr-4": {
+            "Hyva\\CheckoutDotdigitalgroupSms\\": "src/"
+        }
+    }
+}
