@@ -11,4 +11,13 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="Hyva\Checkout\Model\Form\EntityForm\EavAttributeShippingAddressForm">
+        <arguments>
+            <argument name="entityFormModifiers" xsi:type="array">
+                <item name="with_dotdigital_marketing_consent" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Model\Form\EntityFormModifier\GuestFormModifier</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>
