@@ -1,0 +1,16 @@
+<?php
+use Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent;
+?>
+<div>
+    <label>
+        <input type="checkbox" x-model="isCheckboxChecked">
+        My Checkbox
+    </label>
+
+    <div x-show="isCheckboxChecked">
+        <label>
+            Input Field
+            <input type="text" x-model="inputField">
+        </label>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+
+        <!-- Either declare component blocks as children of a section container -->
+        <!-- or as direct children of the hyva.checkout.components block -->
+
+        <referenceContainer name="checkout.shipping-details.section" >
+            <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/marketing-consent.phtml">
+                <arguments>
+                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

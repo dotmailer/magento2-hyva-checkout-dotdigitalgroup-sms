@@ -44,7 +44,7 @@ class GuestFormModifier implements EntityFormModifierInterface
             'visible' => true,
             'value' => '',
         ]);
-        //data-validate="{&quot;magewire&quot;:true,&quot;validate-phone-number-with-checkbox&quot;:true}"
+
         $telephoneField->setValidationRule('validate-phone-number-with-checkbox', 'true');
         $checkboxField->assignRelative($telephoneField);
         $form->addField($checkboxField);
