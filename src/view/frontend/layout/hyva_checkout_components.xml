@@ -5,13 +5,14 @@
 
         <!-- Either declare component blocks as children of a section container -->
         <!-- or as direct children of the hyva.checkout.components block -->
-
-        <referenceContainer name="checkout.shipping-details.section" >
+        <referenceContainer name="shipping-details.address-form.customer.after" >
             <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/marketing-consent.phtml">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
                 </arguments>
             </block>
         </referenceContainer>
+
     </body>
 </page>
+

@@ -19,7 +19,6 @@ $consentConfig = $block->getData('consentConfig');
 ?>
 <?php if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
     <script type="module">
-
         import '<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::js/intlTelInput.js')) ?>';
         import {
             validationRule,
@@ -29,9 +28,9 @@ $consentConfig = $block->getData('consentConfig');
         includeStyle('<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::css/hyva.css')) ?>');
 
         window.addEventListener('checkout:step:loaded', () => {
-
             hyva.formValidation.addRule('validate-phone-number-with-checkbox', validationRule)
             intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>);
         })
+        
     </script>
 <?php } ?>
