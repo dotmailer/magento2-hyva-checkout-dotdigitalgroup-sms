@@ -1,0 +1,70 @@
+<?php
+
+/** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingPhone $magewire */
+?>
+<?php if ($magewire->isCustomerLoggedIn() && !$magewire->isNumberValid() ) { ?>
+    <form
+        method="post"
+        action="<?= $this->getUrl('sms_connector/customeraddress/updatetelephonenumber') ?>"
+        wire:submit.prevent="updateTelephoneNumber"
+        x-data="{
+            ...hyva.formValidation($el),
+            shippingPhoneNumber: '<?= $magewire->phoneNumber ?>',
+            addressId: Livewire.find('checkout.shipping-details.address-list').activeAddressEntity,
+            isLoading: false
+        }"
+        @submit="ShippingFormSubmit"
+    >
+        <div x-show="!isLoading">
+
+            <input x-model="addressId" name="addressId"  hidden  />
+            <div class="col-span-12 pt-4 field-wrapper field-type-tel field field-reserved field-telephone md:col-span-6" wire:ignore.self>
+                <label for="marketing-consent" class="ms-2 ml-2 mt-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        <?= __('Phone Number') ?>
+                </label>
+                <input
+                    class="block w-full form-input grow renderer-text telephone"
+                    type="tel"
+                    name="phoneNumber"
+                    data-validate="{&quot;validate-phone-number-with-checkbox&quot: true, &quot;required&quot: true}"
+                    x-model="shippingPhoneNumber"
+                >
+            </div>
+
+            <div>
+                <button type="button" class="btn btn-primary"
+                        @click="ShippingFormSubmit">
+                    <?= $this->escapeHtml(__('Save')) ?>
+                </button>
+            </div>
+
+        </div>
+
+        <div role="status" class="p-4" x-show="isLoading">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" width="130" height="130" style="shape-rendering: auto; display: block; background: rgb(255, 255, 255);">
+                <g>
+                    <path stroke="none" fill="#caccd1" d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50">
+                        <animateTransform values="0 50 51;360 50 51" keyTimes="0;1" repeatCount="indefinite" dur="1s" type="rotate" attributeName="transform"/>
+                    </path>
+                    <g/>
+                </g>
+            </svg>
+            <span class="sr-only">Loading...</span>
+        </div>
+
+    </form>
+
+    <script>
+        async function ShippingFormSubmit(event) {
+            this.isLoading = true;
+            event.preventDefault();
+            await this.validate()
+            await this.$wire.updateTelephoneNumber({
+                phoneNumber: this.shippingPhoneNumber,
+                addressId: this.addressId
+            });
+            window.location.reload();
+        }
+    </script>
+<?php } ?>
+

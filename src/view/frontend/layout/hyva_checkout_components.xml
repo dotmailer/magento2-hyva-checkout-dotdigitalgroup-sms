@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="hyva_form_validation"/>
     <body>
 
         <!-- Either declare component blocks as children of a section container -->
@@ -9,6 +10,13 @@
             <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/marketing-consent.phtml">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceContainer name="checkout.shipping-details.section" >
+            <block name="hyva-checkout-sms-validation" template="Hyva_CheckoutDotdigitalgroupSms::component/shipping-phone.phtml">
+                <arguments>
+                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingPhone</argument>
                 </arguments>
             </block>
         </referenceContainer>
