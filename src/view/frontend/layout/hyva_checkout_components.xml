@@ -18,6 +18,11 @@
                 <arguments>
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingPhone</argument>
                 </arguments>
+                <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/marketing-consent.phtml">
+                    <arguments>
+                        <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
+                    </arguments>
+                </block>
             </block>
         </referenceContainer>
 

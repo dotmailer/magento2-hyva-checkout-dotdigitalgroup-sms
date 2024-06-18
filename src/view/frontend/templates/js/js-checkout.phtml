@@ -32,5 +32,10 @@ $consentConfig = $block->getData('consentConfig');
             intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>);
         })
 
+        window.addEventListener('intlInput:loadBySelector', (event) => {
+            console.log('intlInput:loadBySelector', event.detail.selector);
+            intlInput(event.detail.selector, <?= $telephoneInputConfig->getConfig(); ?>);
+        });
+
     </script>
 <?php } ?>

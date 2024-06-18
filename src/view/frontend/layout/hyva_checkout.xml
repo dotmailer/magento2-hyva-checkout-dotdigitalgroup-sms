@@ -2,7 +2,7 @@
     <body>
         <referenceContainer name="after.body.start">
             <block ifconfig="transactional_sms/sms_settings/phone_number_validation"
-                   template="Hyva_CheckoutDotdigitalgroupSms::js/js-guest-checkout.phtml"
+                   template="Hyva_CheckoutDotdigitalgroupSms::js/js-checkout.phtml"
                    name="checkout.international.telephone.input">
                 <arguments>
                     <argument name="telephoneInputConfig" xsi:type="object">Dotdigitalgroup\Sms\ViewModel\TelephoneInputConfig</argument>
