@@ -5,7 +5,6 @@
 <div
     class="col-span-12 field-wrapper field-type-tel field field-reserved field-telephone md:col-span-6"
     wire:id="checkout.marketing-consent"
-    x-init="window.dispatchEvent(new CustomEvent('intlInput:loadBySelector', {detail: {selector: '#DotdigialMarketingConsentPhoneNumber' }}))"
     x-data="{
         marketingConsent: '<?= $magewire->getIsSubscribed() ?>',
         marketingConsentPhoneNumber: '<?= $magewire->getStoredMobileNumber() ?>',
@@ -17,6 +16,7 @@
 
         <div class="flex items-center">
             <input
+                name="marketingConsent"
                 id="marketing-consent"
                 type="checkbox"
                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -32,11 +32,12 @@
         <div class="flex items-center gap-4 pt-4" x-show="marketingConsent">
             <div class="w-full gap-2 items-center">
                 <input
+                    name="marketingConsentPhoneNumber"
                     id="DotdigialMarketingConsentPhoneNumber"
                     :disabled="!marketingConsent"
+                    x-intl-input
                     x-model="marketingConsentPhoneNumber"
                     class="block w-full form-input grow renderer-text telephone"
-                    type="tel"
                     data-validate="{&quot;validate-phone-number-with-checkbox&quot;: true, &quot;required&quot;: true}"
             </div>
             <div class="w-full pt-3 gap-2 items-center">

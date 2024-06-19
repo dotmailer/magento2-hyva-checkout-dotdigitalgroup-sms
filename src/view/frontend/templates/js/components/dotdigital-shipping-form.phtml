@@ -1,0 +1,60 @@
+<script>
+
+    function initDotdigitalSmsValidationForm(form, wire) {
+
+        const address_list = Livewire.find('checkout.shipping-details.address-list')
+
+        const checkSelectedShippingAddressValid = async ( form ) => {
+            try {
+                await form.validate()
+            } catch (e) {
+                wire.updateValidity(false)
+                return
+            }
+            wire.updateValidity(true)
+        }
+
+        const collectFormData = (form) => {
+            const payload = {}
+            for ([key, value] of  new FormData(form).entries()) {
+                payload[key] = value
+            }
+            return payload
+        }
+
+        return Object.assign(
+            hyva.formValidation(form),
+            initMagewireForm(form, wire),
+            {
+                loading: true,
+                isValid: wire.entangle('isValid'),
+                phoneNumber: wire.phoneNumber,
+                addressId: address_list.activeAddressEntity
+            },
+            {
+                init(){
+                    this.$nextTick(() => checkSelectedShippingAddressValid(this))
+                    Magewire.hook('element.updated', (el, component) => {
+                        if (component.id === 'checkout.shipping-details.address-list') {
+                            wire.refresh()
+                        }
+                    });
+                },
+
+                async shippingFormSubmit(event) {
+                    const payload = collectFormData(this.$el)
+
+                    try {
+                        await this.validate()
+                    } catch (e) {
+                        return
+                    }
+
+                    await wire.shippingFormSubmit(payload)
+                    await wire.refresh()
+                },
+
+
+            })
+    }
+</script>

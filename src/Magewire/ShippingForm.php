@@ -1,50 +1,66 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
+use Hyva\Checkout\Model\Magewire\Component\Evaluation\EvaluationResult;
+use Hyva\Checkout\Model\Magewire\Component\EvaluationInterface;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationResultFactory;
-use Hyva\Checkout\Model\Magewire\Component\EvaluationResultInterface;
+use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session as SessionCustomer;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magewirephp\Magewire\Component\Form;
 
-class ShippingPhone extends \Magewirephp\Magewire\Component implements \Hyva\Checkout\Model\Magewire\Component\EvaluationInterface
+class ShippingForm extends Form implements EvaluationInterface
 {
 
     protected $listeners = [
-        'address_list_updated' => 'update',
-        'shipping_phone_number_updated' => 'update'
+        'address_list_updated' => '$refresh'
     ];
 
-    public $isValid = false;
+    public $isValid = true;
 
     /**
      * @var string
      */
     public $phoneNumber = '';
 
+    /**
+     * @var SessionCustomer
+     */
     private $sessionCustomer;
 
+    /**
+     * @var AddressRepositoryInterface
+     */
     private $addressRepository;
 
+    /**
+     * @var ResultFactory
+     */
     private $resultFactory;
 
+    /**
+     * @var CartRepositoryInterface
+     */
     private $quoteRepository;
 
+    /**
+     * @var Session
+     */
     private $checkoutSession;
 
     public function __construct(
-        SessionCustomer $sessionCustomer,
+        SessionCustomer            $sessionCustomer,
         AddressRepositoryInterface $addressRepository,
-        ResultFactory $resultFactory,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
-        \Magento\Checkout\Model\Session $checkoutSession
-    ) {
+        ResultFactory              $resultFactory,
+        CartRepositoryInterface    $quoteRepository,
+        Session                    $checkoutSession
+    )
+    {
         $this->sessionCustomer = $sessionCustomer;
         $this->addressRepository = $addressRepository;
         $this->resultFactory = $resultFactory;
@@ -66,34 +82,19 @@ class ShippingPhone extends \Magewirephp\Magewire\Component implements \Hyva\Che
             ->getShippingAddress()
             ->getTelephone();
 
-        $this->isValid = $this->isNumberValid();
-
         Parent::boot();
     }
 
-
-    public function update()
+    public function shippingFormSubmit(array $data)
     {
-        $this->phoneNumber = $this->checkoutSession
-            ->getQuote()
-            ->getShippingAddress()
-            ->getTelephone();
-        $this->isValid = $this->isNumberValid();
-    }
 
-    public function formSubmit(array $data): ResultInterface
-    {
         $this->updateCustomerAddress(
-            $this->checkoutSession->getQuote()->getShippingAddress()->getId(),
+            $data['addressId'],
             $data['phoneNumber']
         );
 
-        $this->phoneNumber = $data['phoneNumber'];
-        $this->isValid = $this->isNumberValid();
-
-        return $this->resultFactory
-            ->create(ResultFactory::TYPE_RAW)
-            ->setHttpResponseCode(200);
+        $this->updateValidity(true);
+        $this->setPhoneNumber($data['phoneNumber']);
     }
 
     public function isCustomerLoggedIn(): bool
@@ -101,13 +102,8 @@ class ShippingPhone extends \Magewirephp\Magewire\Component implements \Hyva\Che
         return $this->sessionCustomer->isLoggedIn();
     }
 
-    public function isNumberValid(): bool{
-        return (bool) preg_match('/^\+\d{1,3}[0-9]{7,12}$/', $this->phoneNumber);
-    }
-
-    public function evaluateCompletion(\Hyva\Checkout\Model\Magewire\Component\EvaluationResultFactory $resultFactory): \Hyva\Checkout\Model\Magewire\Component\Evaluation\EvaluationResult
+    public function evaluateCompletion(EvaluationResultFactory $resultFactory): EvaluationResult
     {
-
         if ($this->isValid) {
             return $resultFactory->createSuccess();
         }
@@ -119,10 +115,31 @@ class ShippingPhone extends \Magewirephp\Magewire\Component implements \Hyva\Che
 
     }
 
+
+    public function setPhoneNumber($phoneNumber)
+    {
+        $this->phoneNumber = $phoneNumber;
+    }
+
+    public function updateValidity($validity = false)
+    {
+        $this->isValid = $validity;
+    }
+
+    public function doReset()
+    {
+        $this->reset(null,true);
+
+    }
+
     private function updateCustomerAddress($addressId, $phoneNumber)
     {
         $address = $this->addressRepository->getById($addressId);
         $address->setTelephone($phoneNumber);
         $this->addressRepository->save($address);
+
+        $quote = $this->checkoutSession->getQuote();
+        $quote->getShippingAddress()->setTelephone($phoneNumber);
+        $this->quoteRepository->save($quote);
     }
 }

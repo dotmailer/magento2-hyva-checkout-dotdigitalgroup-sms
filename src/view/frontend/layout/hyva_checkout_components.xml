@@ -7,25 +7,26 @@
         <!-- Either declare component blocks as children of a section container -->
         <!-- or as direct children of the hyva.checkout.components block -->
         <referenceContainer name="shipping-details.address-form.customer.after" >
-            <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/marketing-consent.phtml">
+            <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
                 </arguments>
             </block>
         </referenceContainer>
+
         <referenceContainer name="checkout.shipping-details.section" >
-            <block name="hyva-checkout-sms-validation" template="Hyva_CheckoutDotdigitalgroupSms::component/shipping-phone.phtml">
+            <block name="hyva-checkout-sms-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-shipping-form.phtml">
                 <arguments>
-                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingPhone</argument>
+                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm</argument>
                 </arguments>
-                <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/marketing-consent.phtml">
+                <block name="hyva-checkout-sms-form-js" template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-shipping-form.phtml"/>
+                <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
                     <arguments>
                         <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
                     </arguments>
                 </block>
             </block>
         </referenceContainer>
-
     </body>
 </page>
 

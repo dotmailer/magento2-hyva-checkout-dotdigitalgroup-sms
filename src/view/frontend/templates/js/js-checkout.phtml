@@ -27,15 +27,29 @@ $consentConfig = $block->getData('consentConfig');
         } from '<?= $escaper->escapeJs($block->getViewFileUrl('Hyva_DotdigitalgroupSms::js/intl-input-validation.js')) ?>';
         includeStyle('<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::css/hyva.css')) ?>');
 
-        window.addEventListener('checkout:step:loaded', () => {
-            hyva.formValidation.addRule('validate-phone-number-with-checkbox', validationRule)
-            intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>);
-        })
+        window.addEventListener(
+            'alpine:init',
+            () => hyva.formValidation.addRule( 'validate-phone-number', validationRule )
+        );
 
-        window.addEventListener('intlInput:loadBySelector', (event) => {
-            console.log('intlInput:loadBySelector', event.detail.selector);
-            intlInput(event.detail.selector, <?= $telephoneInputConfig->getConfig(); ?>);
+        window.addEventListener(
+            'alpine:init',
+            () => hyva.formValidation.addRule( 'validate-phone-number-with-checkbox', validationRule )
+        );
+
+        window.addEventListener(
+            'checkout:step:loaded',
+            () => intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>)
+        );
+
+        document.addEventListener('alpine:init', () => {
+
+            Alpine.directive('intl-input',(el, props, core) => {
+                const config = { ...<?= $telephoneInputConfig->getConfig(); ?>, ...props.expression };
+                const iti = window.intlTelInput(el, config);
+                core.cleanup(() => iti.destroy() );
+            });
+
         });
-
     </script>
 <?php } ?>
