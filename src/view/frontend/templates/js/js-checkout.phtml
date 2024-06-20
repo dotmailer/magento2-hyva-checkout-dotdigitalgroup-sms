@@ -39,7 +39,6 @@ if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
         window.addEventListener(
             'alpine:init',
             () => {
-                hyva.formValidation.addRule( 'validate-phone-number', validationRule );
                 hyva.formValidation.addRule( 'validate-phone-number-with-checkbox', validationRule );
             }
         );
@@ -50,15 +49,30 @@ if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
             () => intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>)
         );
 
+        Magewire.hook('element.updated', (el, component) => {
+            if (component.id === 'checkout.shipping-details.address-form') {
+                intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>);
+            }
+        }, true);
+
         // Add a directive to the Alpine.js instance for the international telephone input.
         document.addEventListener('alpine:init', () => {
 
-            Alpine.directive('intl-input',(el, props, core) => {
+            Alpine.directive('intl-input',(el, props, {cleanup}) => {
                 const config = { ...<?= $telephoneInputConfig->getConfig(); ?>, ...props.expression };
                 const iti = window.intlTelInput(el, config);
                 el.addEventListener('change', () => {
                     el.value = iti.getNumber();
                 });
+
+                cleanup(() => {
+                    iti.destroy();
+                });
+                return {
+                    update(value) {
+                        iti.setNumber(value);
+                    }
+                };
             });
 
         });
