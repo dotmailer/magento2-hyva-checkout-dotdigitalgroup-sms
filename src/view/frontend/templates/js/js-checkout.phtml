@@ -56,12 +56,9 @@ if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
             Alpine.directive('intl-input',(el, props, core) => {
                 const config = { ...<?= $telephoneInputConfig->getConfig(); ?>, ...props.expression };
                 const iti = window.intlTelInput(el, config);
-            .
                 el.addEventListener('change', () => {
                     el.value = iti.getNumber();
                 });
-
-                core.cleanup(() => iti.destroy() );
             });
 
         });
