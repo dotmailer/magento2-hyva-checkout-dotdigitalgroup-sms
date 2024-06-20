@@ -7,7 +7,7 @@
         "magento/framework": "*",
         "hyva-themes/magento2-hyva-checkout": "^1.1.5",
         "dotdigital/dotdigital-magento2-extension-sms": "^2.2.1",
-        "hyva-themes/magento2-dotdigitalgroup-sms": "^1.0.0"
+        "dotdigital/magento2-dotdigitalgroup-sms": "^1.0.0"
     },
     "license": "MIT",
     "autoload": {

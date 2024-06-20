@@ -20,13 +20,14 @@
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm</argument>
                 </arguments>
                 <block name="hyva-checkout-sms-form-js" template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-shipping-form.phtml"/>
-                <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
+                <block name="hyva-checkout-marketing-consent-shiping-list" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
                     <arguments>
                         <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
                     </arguments>
                 </block>
             </block>
         </referenceContainer>
+
     </body>
 </page>
 
