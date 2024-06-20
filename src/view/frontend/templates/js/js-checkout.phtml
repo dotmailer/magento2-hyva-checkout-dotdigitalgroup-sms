@@ -13,12 +13,20 @@ use Magento\Framework\View\Element\Template;
  * @var MarketingConsent $consentConfig
  * @var Escaper $escaper
  */
+
 // @codingStandardsIgnoreFile
+
+// Get the telephone input configuration from the block data.
 $telephoneInputConfig = $block->getData('telephoneInputConfig');
+
+// Get the consent configuration from the block data.
 $consentConfig = $block->getData('consentConfig');
-?>
-<?php if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
+
+// Check if the phone number should be validated with a checkbox.
+if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
+
     <script type="module">
+        // Import the necessary modules and styles.
         import '<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::js/intlTelInput.js')) ?>';
         import {
             validationRule,
@@ -27,26 +35,32 @@ $consentConfig = $block->getData('consentConfig');
         } from '<?= $escaper->escapeJs($block->getViewFileUrl('Hyva_DotdigitalgroupSms::js/intl-input-validation.js')) ?>';
         includeStyle('<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::css/hyva.css')) ?>');
 
+        // Add the validation rules to the form validation.
         window.addEventListener(
             'alpine:init',
-            () => hyva.formValidation.addRule( 'validate-phone-number', validationRule )
+            () => {
+                hyva.formValidation.addRule( 'validate-phone-number', validationRule );
+                hyva.formValidation.addRule( 'validate-phone-number-with-checkbox', validationRule );
+            }
         );
 
-        window.addEventListener(
-            'alpine:init',
-            () => hyva.formValidation.addRule( 'validate-phone-number-with-checkbox', validationRule )
-        );
-
+        // Initialize the international telephone input when the checkout step is loaded.
         window.addEventListener(
             'checkout:step:loaded',
             () => intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>)
         );
 
+        // Add a directive to the Alpine.js instance for the international telephone input.
         document.addEventListener('alpine:init', () => {
 
             Alpine.directive('intl-input',(el, props, core) => {
                 const config = { ...<?= $telephoneInputConfig->getConfig(); ?>, ...props.expression };
                 const iti = window.intlTelInput(el, config);
+            .
+                el.addEventListener('change', () => {
+                    el.value = iti.getNumber();
+                });
+
                 core.cleanup(() => iti.destroy() );
             });
 

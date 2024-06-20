@@ -10,10 +10,20 @@ use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session as SessionCustomer;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magewirephp\Magewire\Component\Form;
 
+/**
+ * Class ShippingForm
+ *
+ * This class is a Magewire component that handles the shipping form.
+ * It uses the SessionCustomer, AddressRepositoryInterface, ResultFactory, CartRepositoryInterface, and Session classes to manage the shipping form data.
+ * The class includes methods for submitting the shipping form, checking if the customer is logged in, evaluating the completion of the form, setting the phone number, updating the validity of the form, and updating the customer address.
+ *
+ * @package Hyva\CheckoutDotdigitalgroupSms\Magewire
+ */
 class ShippingForm extends Form implements EvaluationInterface
 {
 
@@ -53,6 +63,15 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private $checkoutSession;
 
+    /**
+     * ShippingForm constructor.
+     *
+     * @param SessionCustomer            $sessionCustomer
+     * @param AddressRepositoryInterface $addressRepository
+     * @param ResultFactory              $resultFactory
+     * @param CartRepositoryInterface    $quoteRepository
+     * @param Session                    $checkoutSession
+     */
     public function __construct(
         SessionCustomer            $sessionCustomer,
         AddressRepositoryInterface $addressRepository,
@@ -69,6 +88,9 @@ class ShippingForm extends Form implements EvaluationInterface
     }
 
     /**
+     * The boot method is called when the component is initialized.
+     * It checks if the customer is logged in and sets the phone number from the shipping address in the checkout session.
+     *
      * @throws NoSuchEntityException
      */
     public function boot(): void
@@ -85,6 +107,12 @@ class ShippingForm extends Form implements EvaluationInterface
         Parent::boot();
     }
 
+    /**
+     * The shippingFormSubmit method is called when the shipping form is submitted.
+     * It updates the customer address with the provided address ID and phone number, updates the validity of the form to true, and sets the phone number.
+     *
+     * @param array $data
+     */
     public function shippingFormSubmit(array $data)
     {
 
@@ -97,11 +125,23 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->setPhoneNumber($data['phoneNumber']);
     }
 
+    /**
+     * The isCustomerLoggedIn method checks if the customer is logged in.
+     *
+     * @return bool
+     */
     public function isCustomerLoggedIn(): bool
     {
         return $this->sessionCustomer->isLoggedIn();
     }
 
+    /**
+     * The evaluateCompletion method is called to evaluate the completion of the form.
+     * It returns a success result if the form is valid, otherwise it returns an error message.
+     *
+     * @param EvaluationResultFactory $resultFactory
+     * @return EvaluationResult
+     */
     public function evaluateCompletion(EvaluationResultFactory $resultFactory): EvaluationResult
     {
         if ($this->isValid) {
@@ -115,23 +155,35 @@ class ShippingForm extends Form implements EvaluationInterface
 
     }
 
-
+    /**
+     * The setPhoneNumber method sets the phone number.
+     *
+     * @param string $phoneNumber
+     */
     public function setPhoneNumber($phoneNumber)
     {
         $this->phoneNumber = $phoneNumber;
     }
 
+    /**
+     * The updateValidity method updates the validity of the form.
+     *
+     * @param bool $validity
+     */
     public function updateValidity($validity = false)
     {
         $this->isValid = $validity;
     }
 
-    public function doReset()
-    {
-        $this->reset(null,true);
-
-    }
-
+    /**
+     * The updateCustomerAddress method updates the customer address with the provided address ID and phone number.
+     * It saves the updated address in the address repository and the shipping address in the quote repository.
+     *
+     * @param int $addressId
+     * @param string $phoneNumber
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     private function updateCustomerAddress($addressId, $phoneNumber)
     {
         $address = $this->addressRepository->getById($addressId);
