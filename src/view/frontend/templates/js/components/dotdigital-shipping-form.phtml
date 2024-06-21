@@ -9,9 +9,6 @@
      */
     function initDotdigitalSmsValidationForm(form, wire) {
 
-        // Find the address list component in the Livewire instance.
-        const address_list = Livewire.find('checkout.shipping-details.address-list')
-
         /**
          * This function checks if the selected shipping address is valid.
          *
@@ -50,13 +47,11 @@
             hyva.formValidation(form),
             {
                 isValid: wire.entangle('isValid'),
-                phoneNumber: wire.phoneNumber,
-                addressId: address_list.activeAddressEntity
+                phoneNumber: wire.entangle('phoneNumber').defer,
+                addressId: wire.entangle('addressId').defer
             },
             {
                 init(){
-
-                    console.log('initDotdigitalSmsValidationForm')
                     /**
                      * This step will add a new listener to the navigation to validate and submit the shipping form
                      * when the user navigates to the next step.
@@ -73,7 +68,8 @@
                      */
                     Magewire.hook('element.updated', (el, component) => {
                         if (component.id === 'checkout.shipping-details.address-list') {
-                            wire.refresh()
+                            wire.emit('address_list_updated')
+                            wire.$refresh()
                         }
                     });
                 },
