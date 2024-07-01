@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Magewirephp\Magewire\Component;
-use Dotdigitalgroup\Sms\ViewModel\TelephoneInputConfig;
 use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent as MarketingConsentViewModel;
+use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
 
 /**
  * Class MarketingConsent
@@ -19,6 +23,7 @@ use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent as Marketing
  */
 class MarketingConsent extends Component
 {
+    public $isConsnetEnabledAtCheckout = false;
 
     /**
      * @var MarketingConsentViewModel
@@ -26,23 +31,44 @@ class MarketingConsent extends Component
     private $marketingConsent;
 
     /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
+    /**
      * MarketingConsent constructor.
      *
      * @param MarketingConsentViewModel $marketingConsent
+     * @param StoreManagerInterface $storeManager
+     * @param ScopeConfigInterface $config
      */
     public function __construct(
-        MarketingConsentViewModel $marketingConsent
+        MarketingConsentViewModel $marketingConsent,
+        StoreManagerInterface $storeManager,
+        ScopeConfigInterface $scopeConfig,
     ) {
         $this->marketingConsent = $marketingConsent;
+        $this->storeManager = $storeManager;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
      * The boot method is called when the component is initialized.
      *
-     * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function boot(): void
     {
+        $this->isConsnetEnabledAtCheckout = (bool) $this->scopeConfig->getValue(
+            ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
+            ScopeInterface::SCOPE_STORES,
+            $this->storeManager->getStore()->getId()
+        );
         Parent::boot();
     }
 
@@ -50,6 +76,7 @@ class MarketingConsent extends Component
      * Get the marketing consent label from the MarketingConsentViewModel.
      *
      * @return string
+     * @throws NoSuchEntityException
      */
     public function getMarketingConsentLabel(): string
     {
@@ -60,6 +87,7 @@ class MarketingConsent extends Component
      * Get the marketing consent text from the MarketingConsentViewModel.
      *
      * @return string
+     * @throws NoSuchEntityException
      */
     public function getMarketingConsentText(): string
     {
@@ -70,6 +98,7 @@ class MarketingConsent extends Component
      * Get the stored mobile number from the MarketingConsentViewModel.
      *
      * @return string
+     * @throws LocalizedException
      */
     public function getStoredMobileNumber(): string
     {
@@ -80,6 +109,7 @@ class MarketingConsent extends Component
      * Check if the user is subscribed to marketing consent from the MarketingConsentViewModel.
      *
      * @return bool
+     * @throws LocalizedException
      */
     public function getIsSubscribed(): bool
     {
