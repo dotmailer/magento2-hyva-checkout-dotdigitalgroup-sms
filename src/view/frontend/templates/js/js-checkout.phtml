@@ -58,21 +58,29 @@ if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
         // Add a directive to the Alpine.js instance for the international telephone input.
         document.addEventListener('alpine:init', () => {
 
-            Alpine.directive('intl-input',(el, props, {cleanup}) => {
-                const config = { ...<?= $telephoneInputConfig->getConfig(); ?>, ...props.expression };
-                const iti = window.intlTelInput(el, config);
-                el.addEventListener('change', () => {
-                    el.value = iti.getNumber();
+            Alpine.directive('intl-input',(el, props, {effect, cleanup}) => {
+
+                const config = {
+                    ...<?= $telephoneInputConfig->getConfig(); ?>,
+                    ...props.expression
+                };
+
+
+
+                effect(() => {
+                    const parent = el.closest('.field-reserved');
+                    console.log(parent);
+
+                    if (!window.intlTelInput) return console.warn('intlTelInput is not loaded')
+                    if (!window.intlTelInputGlobals) return console.warn('intlTelInputGlobals is not loaded')
+                    window.intlTelInput(el, config);
                 });
 
                 cleanup(() => {
-                    iti.destroy();
+                    delete window.intlTelInput(el);
+                    delete el.intlTelInput;
                 });
-                return {
-                    update(value) {
-                        iti.setNumber(value);
-                    }
-                };
+
             });
 
         });

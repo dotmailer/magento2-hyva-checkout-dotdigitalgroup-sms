@@ -56,8 +56,8 @@
                      * This step will add a new listener to the navigation to validate and submit the shipping form
                      * when the user navigates to the next step.
                      */
-                    hyvaCheckout.navigation.addTask(() => this.validate())
-                    hyvaCheckout.navigation.addTask(() => this.shippingFormSubmit())
+                    hyvaCheckout.navigation.addTask(() => this.validate(), {stackPosition: 500})
+                    hyvaCheckout.navigation.addTask(() => this.shippingFormSubmit(), {stackPosition: 600})
 
                     /**
                      * This step will check if the selected shipping address is valid when the form is loaded.
@@ -78,10 +78,9 @@
                 /**
                  * This method will submit the shipping form.
                  *
-                 * @param {Event} event - The event object.
                  * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the success of the form submission.
                  */
-                async shippingFormSubmit(event) {
+                async shippingFormSubmit() {
                     const payload = collectFormData(this.$el)
                     try {
                         await this.validate()

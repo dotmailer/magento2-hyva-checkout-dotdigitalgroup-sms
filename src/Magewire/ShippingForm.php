@@ -28,7 +28,7 @@ class ShippingForm extends Form implements EvaluationInterface
 {
 
     protected $listeners = [
-        'address_list_updated' => '$refresh'
+        'address_list_updated' => 'update',
     ];
 
     public $isValid = true;
@@ -37,6 +37,11 @@ class ShippingForm extends Form implements EvaluationInterface
      * @var string
      */
     public $phoneNumber = '';
+
+    /**
+     * @var int
+     */
+    public $addressId = null;
 
     /**
      * @var SessionCustomer
@@ -104,9 +109,31 @@ class ShippingForm extends Form implements EvaluationInterface
             ->getShippingAddress()
             ->getTelephone();
 
-
+        $this->addressId = $this->checkoutSession
+            ->getQuote()
+            ->getShippingAddress()
+            ->getCustomerAddressId();
 
         Parent::boot();
+    }
+
+    /**
+     * The update method is called when the address list is updated.
+     * It updates the phone number and address ID from the shipping address in the checkout session.
+     */
+    public function update()
+    {
+        $this->phoneNumber = $this->checkoutSession
+            ->getQuote()
+            ->getShippingAddress()
+            ->getTelephone();
+
+        $this->addressId = $this->checkoutSession
+            ->getQuote()
+            ->getShippingAddress()
+            ->getCustomerAddressId();
+
+        $this->emit('update');
     }
 
     /**
@@ -114,6 +141,8 @@ class ShippingForm extends Form implements EvaluationInterface
      * It updates the customer address with the provided address ID and phone number, updates the validity of the form to true, and sets the phone number.
      *
      * @param array $data
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function shippingFormSubmit(array $data)
     {
@@ -125,6 +154,7 @@ class ShippingForm extends Form implements EvaluationInterface
 
         $this->updateValidity(true);
         $this->setPhoneNumber($data['phoneNumber']);
+
     }
 
     /**

@@ -22,7 +22,8 @@
         <input x-model="addressId" name="addressId" hidden/>
 
         <!-- Phone number input section -->
-        <div class="flex flex-col items-center gap-4 pt-4" x-show="!isValid">
+        <?php if (!$magewire->getIsValid()) : ?>
+        <div class="flex flex-col items-center gap-4 pt-4">
 
             <div class="w-full gap-2 items-center">
                 <label for="DotdigialShippingPhoneNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -37,11 +38,13 @@
                     :disabled="isValid"
                     x-intl-input
                     x-model="phoneNumber"
+                    x-reloaded="console.info('myComponent was reloaded')"
                     class="block w-full form-input grow renderer-text telephone"
                     data-validate="{&quot;validate-phone-number-with-checkbox&quot;: true, &quot;required&quot;: true}"/>
             </div>
 
         </div>
+        <?php endif; ?>
 
         <!-- Marketing consent section -->
         <div class="w-full pb-4 mb-4 mt-3">
