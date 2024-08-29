@@ -15,13 +15,10 @@ use Magento\Framework\View\Element\Template;
  */
 
 // @codingStandardsIgnoreFile
-
 // Get the telephone input configuration from the block data.
 $telephoneInputConfig = $block->getData('telephoneInputConfig');
-
 // Get the consent configuration from the block data.
 $consentConfig = $block->getData('consentConfig');
-
 // Check if the phone number should be validated with a checkbox.
 if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
 
@@ -65,12 +62,7 @@ if ($consentConfig->shouldValidatePhoneNumberWithCheckbox()) { ?>
                     ...props.expression
                 };
 
-
-
                 effect(() => {
-                    const parent = el.closest('.field-reserved');
-                    console.log(parent);
-
                     if (!window.intlTelInput) return console.warn('intlTelInput is not loaded')
                     if (!window.intlTelInputGlobals) return console.warn('intlTelInputGlobals is not loaded')
                     window.intlTelInput(el, config);

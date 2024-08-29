@@ -53,6 +53,14 @@
             {
                 init(){
                     /**
+                     * Check validity when requested by the server
+                     * @see Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm::update
+                     */
+                    wire.on('check-validity', () => {
+                        this.$nextTick(() => checkSelectedShippingAddressValid(this).finally(() => wire.$refresh()))
+                    });
+
+                    /**
                      * This step will add a new listener to the navigation to validate and submit the shipping form
                      * when the user navigates to the next step.
                      */
@@ -60,19 +68,24 @@
                     hyvaCheckout.navigation.addTask(() => this.shippingFormSubmit(), {stackPosition: 600})
 
                     /**
-                     * This step will check if the selected shipping address is valid when the form is loaded.
-                     */
-                    this.$nextTick(() => checkSelectedShippingAddressValid(this))
-
-                    /**
                      * This step will refresh the shipping form when the address list is updated.
                      */
                     Magewire.hook('element.updated', (el, component) => {
+                        let hasProcessed = false
+                        if (hasProcessed) return
                         if (component.id === 'checkout.shipping-details.address-list') {
                             wire.emit('address_list_updated')
                             wire.$refresh()
                         }
                     });
+
+                    /**
+                     * This is not ideal, we need to address this in the future.
+                     */
+                    setTimeout(() => {
+                        this.$nextTick(() => checkSelectedShippingAddressValid(this).finally(() => wire.$refresh()))
+                    },100)
+
                 },
 
                 /**
@@ -90,9 +103,7 @@
 
                     await wire.shippingFormSubmit(payload)
                     await wire.refresh()
-                },
-
-
+                }
             })
     }
 </script>

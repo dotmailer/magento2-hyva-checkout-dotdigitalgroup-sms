@@ -4,16 +4,6 @@
     <update handle="hyva_form_validation"/>
     <body>
 
-        <!-- Either declare component blocks as children of a section container -->
-        <!-- or as direct children of the hyva.checkout.components block -->
-        <referenceContainer name="shipping-details.address-form.customer.after" >
-            <block name="hyva-checkout-marketing-consent" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
-                <arguments>
-                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
-                </arguments>
-            </block>
-        </referenceContainer>
-
         <referenceContainer name="checkout.shipping-details.section" >
             <block name="hyva-checkout-sms-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-shipping-form.phtml">
                 <arguments>

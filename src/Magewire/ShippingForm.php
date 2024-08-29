@@ -2,15 +2,12 @@
 
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
-use Hyva\Checkout\Model\Magewire\Component\Evaluation\EvaluationResult;
+use Dotdigitalgroup\Email\Logger\Logger;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationInterface;
-use Hyva\Checkout\Model\Magewire\Component\EvaluationResultFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session as SessionCustomer;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magewirephp\Magewire\Component\Form;
@@ -26,12 +23,24 @@ use Magewirephp\Magewire\Component\Form;
  */
 class ShippingForm extends Form implements EvaluationInterface
 {
+    /**
+     * @var string[]
+     */
 
     protected $listeners = [
         'address_list_updated' => 'update',
     ];
 
-    public $isValid = true;
+    /**
+     *
+     */
+    public $ready = false;
+
+    /**
+     * @var bool
+     */
+    public $isValid = false;
+
 
     /**
      * @var string
@@ -69,6 +78,12 @@ class ShippingForm extends Form implements EvaluationInterface
     private $checkoutSession;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
+
      * ShippingForm constructor.
      *
      * @param SessionCustomer            $sessionCustomer
@@ -78,11 +93,13 @@ class ShippingForm extends Form implements EvaluationInterface
      * @param Session                    $checkoutSession
      */
     public function __construct(
-        SessionCustomer            $sessionCustomer,
+        SessionCustomer $sessionCustomer,
         AddressRepositoryInterface $addressRepository,
-        ResultFactory              $resultFactory,
-        CartRepositoryInterface    $quoteRepository,
-        Session                    $checkoutSession
+        ResultFactory $resultFactory,
+        CartRepositoryInterface $quoteRepository,
+        Session $checkoutSession,
+        Logger $logger
+
     )
     {
         $this->sessionCustomer = $sessionCustomer;
@@ -90,6 +107,8 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->resultFactory = $resultFactory;
         $this->quoteRepository = $quoteRepository;
         $this->checkoutSession = $checkoutSession;
+        $this->logger = $logger;
+
     }
 
     /**
@@ -114,6 +133,14 @@ class ShippingForm extends Form implements EvaluationInterface
             ->getShippingAddress()
             ->getCustomerAddressId();
 
+        if(!empty($this->addressId))
+        {
+            $this->setPhoneNumber($this->checkoutSession
+                ->getQuote()
+                ->getShippingAddress()
+                ->getTelephone()
+            );
+        }
         Parent::boot();
     }
 
@@ -133,7 +160,18 @@ class ShippingForm extends Form implements EvaluationInterface
             ->getShippingAddress()
             ->getCustomerAddressId();
 
-        $this->emit('update');
+        if(!empty($this->addressId))
+        {
+            $this->setPhoneNumber($this->checkoutSession
+                ->getQuote()
+                ->getShippingAddress()
+                ->getTelephone()
+            );
+        }
+
+        $this->isValid = false;
+        $this->emit('check-validity');
+        $this->emit('$refresh');
     }
 
     /**
@@ -141,20 +179,25 @@ class ShippingForm extends Form implements EvaluationInterface
      * It updates the customer address with the provided address ID and phone number, updates the validity of the form to true, and sets the phone number.
      *
      * @param array $data
+     * @return void|null
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
     public function shippingFormSubmit(array $data)
     {
+        $addressId = (string) array_key_exists('addressId', $data)
+            ? $data['addressId'] : '';
+        $addressPhoneNumber = (string) array_key_exists('phoneNumber', $data)
+            ? $data['phoneNumber'] : '';
+        $marketingConsentPhoneNumber = (string) array_key_exists('marketingConsentPhoneNumber', $data)
+            ? $data['marketingConsentPhoneNumber'] : '';
+        $marketingConsent = (bool) array_key_exists('marketingConsent', $data)
+            ? true : '';
 
-        $this->updateCustomerAddress(
-            $data['addressId'],
-            $data['phoneNumber']
-        );
-
+        $this->updateCustomerAddress($addressId,$addressPhoneNumber);
+        $this->updateCustomerSession($marketingConsent,$marketingConsentPhoneNumber);
         $this->updateValidity(true);
-        $this->setPhoneNumber($data['phoneNumber']);
-
+        $this->setPhoneNumber($addressPhoneNumber);
     }
 
     /**
@@ -184,15 +227,14 @@ class ShippingForm extends Form implements EvaluationInterface
             ->withMessage(__('Shipping phone number is invalid. Please provide a valid phone number.'))
             ->withVisibilityDuration(5000)
             ->asWarning();
-
     }
 
     /**
      * The setPhoneNumber method sets the phone number.
      *
-     * @param string $phoneNumber
+     * @param string|null $phoneNumber
      */
-    public function setPhoneNumber($phoneNumber)
+    public function setPhoneNumber(?string $phoneNumber): void
     {
         $this->phoneNumber = $phoneNumber;
     }
@@ -205,25 +247,50 @@ class ShippingForm extends Form implements EvaluationInterface
     public function updateValidity($validity = false)
     {
         $this->isValid = $validity;
+        $this->ready = true;
     }
 
     /**
      * The updateCustomerAddress method updates the customer address with the provided address ID and phone number.
      * It saves the updated address in the address repository and the shipping address in the quote repository.
      *
-     * @param int $addressId
-     * @param string $phoneNumber
-     * @throws NoSuchEntityException
+     * @param string|null $addressId
+     * @param string|null $phoneNumber
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    private function updateCustomerAddress($addressId, $phoneNumber)
+    private function updateCustomerAddress(?string $addressId, ?string $phoneNumber)
     {
-        $address = $this->addressRepository->getById($addressId);
-        $address->setTelephone($phoneNumber);
-        $this->addressRepository->save($address);
+        if(!empty($addressId))
+        {
+            try {
+                $address = $this->addressRepository->getById($addressId);
+                $address->setTelephone($phoneNumber);
+                $this->addressRepository->save($address);
+            } catch (\Exeption $exception) {
+                $this->logger->warning($exception->gerMessage());
+            }
+        }
 
-        $quote = $this->checkoutSession->getQuote();
-        $quote->getShippingAddress()->setTelephone($phoneNumber);
-        $this->quoteRepository->save($quote);
+        if(!empty($phoneNumber))
+        {
+            $quote = $this->checkoutSession->getQuote();
+            $quote->getShippingAddress()->setTelephone($phoneNumber);
+            $this->quoteRepository->save($quote);
+        }
+    }
+
+    /**
+     * Update customer session with keys used in the dotdigital listeners to trigger the
+     * save on the contact mobile number.
+     *
+     * @param string $marketingConsent
+     * @param string $phoneNumber
+     * @return void
+     */
+    private function updateCustomerSession(string $marketingConsent, string $phoneNumber)
+    {
+        $this->checkoutSession->setData('dd_sms_consent_checkbox',$marketingConsent);
+        $this->checkoutSession->setData('dd_sms_consent_telephone',$phoneNumber);
     }
 }

@@ -10,49 +10,45 @@
  * The form data is handled by the `initDotdigitalSmsValidationForm` function and the `shippingFormSubmit` method.
  */
 ?>
-<?php if ($magewire->isCustomerLoggedIn()): ?>
-    <form
-        novalidate
-        x-data="initDotdigitalSmsValidationForm($el, $wire)"
-        @submit.prevent="shippingFormSubmit"
-        wire:id="checkout.shipping-details.shipping-phone.form"
-        wire:submit.prevent="shippingFormSubmit"
-    >
-        <!-- Hidden input for the address ID -->
-        <input x-model="addressId" name="addressId" hidden/>
+<form
+    novalidate
+    x-data="initDotdigitalSmsValidationForm($el, $wire)"
+    @submit.prevent="shippingFormSubmit"
+    wire:id="checkout.shipping-details.shipping-phone.form"
+    wire:submit.prevent="shippingFormSubmit"
+>
+    <?php if($magewire->isCustomerLoggedIn()): ?>
+    <!-- Hidden input for the address ID -->
+    <input x-model="addressId" name="addressId" hidden/>
+    <!-- Phone number input section -->
+    <div class="flex flex-col items-center gap-4 pt-4" x-cloak x-show.important="!isValid">
 
-        <!-- Phone number input section -->
-        <?php if (!$magewire->getIsValid()) : ?>
-        <div class="flex flex-col items-center gap-4 pt-4">
-
-            <div class="w-full gap-2 items-center">
-                <label for="DotdigialShippingPhoneNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <?= $block->escapeHtml(__('Phone Number')) ?>
-                </label>
-            </div>
-
-            <div class="w-full gap-2 items-center">
-                <input
-                    name="phoneNumber"
-                    id="DotdigitalShippingPhoneNumber"
-                    :disabled="isValid"
-                    x-intl-input
-                    x-model="phoneNumber"
-                    x-reloaded="console.info('myComponent was reloaded')"
-                    class="block w-full form-input grow renderer-text telephone"
-                    data-validate="{&quot;validate-phone-number-with-checkbox&quot;: true, &quot;required&quot;: true}"/>
-            </div>
-
-        </div>
-        <?php endif; ?>
-
-        <!-- Marketing consent section -->
-        <div class="w-full pb-4 mb-4 mt-3">
-            <?= $block->getChildHtml('hyva-checkout-marketing-consent-customer') ?>
+        <div class="w-full gap-2 items-center">
+            <label for="DotdigialShippingPhoneNumber"
+                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <?= $block->escapeHtml(__('Phone Number')) ?>
+            </label>
         </div>
 
-    </form>
+        <div class="w-full gap-2 items-center">
+            <input
+                name="phoneNumber"
+                id="DotdigialShippingPhoneNumber"
+                x-disabled="isValid"
+                x-intl-input
+                x-model="phoneNumber"
+                class="block w-full form-input grow renderer-text telephone"
+                data-validate="{&quot;validate-phone-number-with-checkbox&quot;: true, &quot;required&quot;: true}"/>
+        </div>
+
+    </div>
+    <?php endif; ?>
+    <!-- Marketing consent section -->
+    <div class="w-full pb-4 mb-4 mt-3">
+        <?= $block->getChildHtml('hyva-checkout-marketing-consent-customer') ?>
+    </div>
 
     <!-- Additional JavaScript for the form -->
     <?= $block->getChildHtml('hyva-checkout-sms-form-js') ?>
-<?php endif; ?>
+
+</form>
