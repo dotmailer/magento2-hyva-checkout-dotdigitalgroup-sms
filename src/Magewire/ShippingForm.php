@@ -3,11 +3,14 @@
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
 use Dotdigitalgroup\Email\Logger\Logger;
+use Hyva\Checkout\Model\Magewire\Component\Evaluation\EvaluationResult;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationInterface;
+use Hyva\Checkout\Model\Magewire\Component\EvaluationResultFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session as SessionCustomer;
 use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magewirephp\Magewire\Component\Form;
@@ -23,10 +26,10 @@ use Magewirephp\Magewire\Component\Form;
  */
 class ShippingForm extends Form implements EvaluationInterface
 {
+
     /**
      * @var string[]
      */
-
     protected $listeners = [
         'address_list_updated' => 'update',
     ];
@@ -40,7 +43,6 @@ class ShippingForm extends Form implements EvaluationInterface
      * @var bool
      */
     public $isValid = false;
-
 
     /**
      * @var string
@@ -83,7 +85,6 @@ class ShippingForm extends Form implements EvaluationInterface
     private $logger;
 
     /**
-
      * ShippingForm constructor.
      *
      * @param SessionCustomer            $sessionCustomer
@@ -99,7 +100,6 @@ class ShippingForm extends Form implements EvaluationInterface
         CartRepositoryInterface $quoteRepository,
         Session $checkoutSession,
         Logger $logger
-
     )
     {
         $this->sessionCustomer = $sessionCustomer;
@@ -108,7 +108,6 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->quoteRepository = $quoteRepository;
         $this->checkoutSession = $checkoutSession;
         $this->logger = $logger;
-
     }
 
     /**
@@ -141,6 +140,7 @@ class ShippingForm extends Form implements EvaluationInterface
                 ->getTelephone()
             );
         }
+
         Parent::boot();
     }
 
