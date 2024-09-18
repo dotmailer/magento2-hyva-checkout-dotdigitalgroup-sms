@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
+use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -41,20 +42,28 @@ class MarketingConsent extends Component
     private $scopeConfig;
 
     /**
+     * @var Session
+     */
+    private $checkoutSession;
+
+    /**
      * MarketingConsent constructor.
      *
      * @param MarketingConsentViewModel $marketingConsent
      * @param StoreManagerInterface $storeManager
-     * @param ScopeConfigInterface $config
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Session $session
      */
     public function __construct(
         MarketingConsentViewModel $marketingConsent,
         StoreManagerInterface $storeManager,
         ScopeConfigInterface $scopeConfig,
+        Session $checkoutSession
     ) {
         $this->marketingConsent = $marketingConsent;
         $this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig;
+        $this->checkoutSession = $checkoutSession;
     }
 
     /**
@@ -102,7 +111,17 @@ class MarketingConsent extends Component
      */
     public function getStoredMobileNumber(): string
     {
-        return $this->marketingConsent->getStoredMobileNumber();
+        $phoneNumber = $this->marketingConsent->getStoredMobileNumber();
+        if (empty($phoneNumber)) {
+            $phoneNumber = $this->checkoutSession
+                ->getQuote()
+                ->getShippingAddress()
+                ->getTelephone();
+        }
+
+        return $phoneNumber;
+
+
     }
 
     /**
@@ -115,5 +134,4 @@ class MarketingConsent extends Component
     {
         return $this->marketingConsent->isSubscribed() ?? false;
     }
-
 }
