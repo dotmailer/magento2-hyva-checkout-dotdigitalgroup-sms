@@ -38,7 +38,7 @@
                 x-intl-input
                 x-model="phoneNumber"
                 class="block w-full form-input grow renderer-text telephone"
-                data-validate="{&quot;validate-phone-number-with-checkbox&quot;: true, &quot;required&quot;: true}"/>
+                data-validate="<?= $magewire->getValidationConfig() ?>"/>
         </div>
 
     </div>

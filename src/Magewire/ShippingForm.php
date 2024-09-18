@@ -3,12 +3,14 @@
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
 use Dotdigitalgroup\Email\Logger\Logger;
+use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent;
 use Hyva\Checkout\Model\Magewire\Component\Evaluation\EvaluationResult;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationInterface;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationResultFactory;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session as SessionCustomer;
+use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -84,6 +86,10 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private $logger;
 
+    private $consent;
+
+    private $eavConfig;
+
     /**
      * ShippingForm constructor.
      *
@@ -94,12 +100,14 @@ class ShippingForm extends Form implements EvaluationInterface
      * @param Session                    $checkoutSession
      */
     public function __construct(
-        SessionCustomer $sessionCustomer,
+        SessionCustomer            $sessionCustomer,
         AddressRepositoryInterface $addressRepository,
-        ResultFactory $resultFactory,
-        CartRepositoryInterface $quoteRepository,
-        Session $checkoutSession,
-        Logger $logger
+        ResultFactory              $resultFactory,
+        CartRepositoryInterface    $quoteRepository,
+        Session                    $checkoutSession,
+        Logger                     $logger,
+        MarketingConsent           $marketingConsent,
+        EavConfig                  $eavConfig
     )
     {
         $this->sessionCustomer = $sessionCustomer;
@@ -108,6 +116,8 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->quoteRepository = $quoteRepository;
         $this->checkoutSession = $checkoutSession;
         $this->logger = $logger;
+        $this->consent = $marketingConsent;
+        $this->eavConfig = $eavConfig;
     }
 
     /**
@@ -250,6 +260,21 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->ready = true;
     }
 
+    public function getValidationConfig() {
+
+        $numberRequired = (bool)$this->eavConfig
+            ->getAttribute('customer_address', 'telephone')
+            ->getIsRequired();
+
+        $validationSet = [
+            "validate-phone-number-with-checkbox" => (bool)$this->consent->isPhoneNumberValidationEnabled()
+        ];
+
+        if( $numberRequired ) $validationSet['required'] = true;
+
+        return htmlspecialchars(json_encode($validationSet, JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8');
+    }
+
     /**
      * The updateCustomerAddress method updates the customer address with the provided address ID and phone number.
      * It saves the updated address in the address repository and the shipping address in the quote repository.
@@ -272,12 +297,12 @@ class ShippingForm extends Form implements EvaluationInterface
             }
         }
 
-        if(!empty($phoneNumber))
-        {
-            $quote = $this->checkoutSession->getQuote();
-            $quote->getShippingAddress()->setTelephone($phoneNumber);
-            $this->quoteRepository->save($quote);
-        }
+        if( is_null($phoneNumber) ) $phoneNumber = '';
+
+        $quote = $this->checkoutSession->getQuote();
+        $quote->getShippingAddress()->setTelephone($phoneNumber);
+        $this->quoteRepository->save($quote);
+
     }
 
     /**

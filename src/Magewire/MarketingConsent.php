@@ -106,8 +106,9 @@ class MarketingConsent extends Component
     /**
      * Get the stored mobile number from the MarketingConsentViewModel.
      *
-     * @return string
+     * @return string|null
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getStoredMobileNumber(): string
     {
@@ -119,7 +120,7 @@ class MarketingConsent extends Component
                 ->getTelephone();
         }
 
-        return $phoneNumber;
+        return (string)$phoneNumber;
 
 
     }
