@@ -24,7 +24,7 @@ use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
  */
 class MarketingConsent extends Component
 {
-    public $isConsnetEnabledAtCheckout = false;
+    public $isConsentEnabledAtCheckout  = false;
 
     /**
      * @var MarketingConsentViewModel
@@ -73,7 +73,7 @@ class MarketingConsent extends Component
      */
     public function boot(): void
     {
-        $this->isConsnetEnabledAtCheckout = (bool) $this->scopeConfig->getValue(
+        $this->isConsentEnabledAtCheckout = (bool) $this->scopeConfig->getValue(
             ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
             ScopeInterface::SCOPE_STORES,
             $this->storeManager->getStore()->getId()
