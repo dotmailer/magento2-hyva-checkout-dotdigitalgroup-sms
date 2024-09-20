@@ -1,6 +1,7 @@
 <?php
 
 /** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm $magewire */
+/** @var \Dotdigitalgroup\Email\Block\Basket $block */
 
 /**
  * This form is used to collect and validate the shipping information.
@@ -21,10 +22,10 @@
     <!-- Hidden input for the address ID -->
     <input x-model="addressId" name="addressId" hidden/>
     <!-- Phone number input section -->
-    <div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4" x-cloak x-show.important="!isValid">
+    <div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4" x-cloak x-show.important="!isValid && addressId">
 
         <div class="w-full gap-2 items-center">
-            <label for="DotdigialShippingPhoneNumber"
+            <label for="DotdigitalShippingPhoneNumber"
                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <?= $block->escapeHtml(__('Phone Number')) ?>
             </label>
@@ -33,7 +34,7 @@
         <div class="w-full gap-2 items-center">
             <input
                 name="phoneNumber"
-                    id="DotdigitalShippingPhoneNumber"
+                id="DotdigitalShippingPhoneNumber"
                 x-disabled="isValid"
                 x-intl-input
                 x-model="phoneNumber"

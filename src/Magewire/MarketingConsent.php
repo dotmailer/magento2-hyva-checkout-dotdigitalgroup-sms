@@ -103,6 +103,8 @@ class MarketingConsent extends Component
         return $this->marketingConsent->getSmsMarketingConsentText();
     }
 
+
+
     /**
      * Get the stored mobile number from the MarketingConsentViewModel.
      *
