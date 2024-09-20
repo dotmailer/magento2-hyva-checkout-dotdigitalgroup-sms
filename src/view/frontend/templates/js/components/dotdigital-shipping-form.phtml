@@ -15,7 +15,7 @@
          * @param {HTMLFormElement} form - The form element to be validated.
          * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the validity of the form.
          */
-        const checkSelectedShippingAddressValid = async ( form ) => {
+        const checkSelectedShippingAddressValidity = async ( form ) => {
             try {
                 await form.validate()
             } catch (e) {
@@ -57,7 +57,7 @@
                      * @see Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm::update
                      */
                     wire.on('check-validity', () => {
-                        this.$nextTick(() => checkSelectedShippingAddressValid(this).finally(() => wire.$refresh()))
+                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => wire.$refresh()))
                     });
 
                     /**
@@ -83,7 +83,7 @@
                      * This is not ideal, we need to address this in the future.
                      */
                     setTimeout(() => {
-                        this.$nextTick(() => checkSelectedShippingAddressValid(this).finally(() => wire.$refresh()))
+                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => wire.$refresh()))
                     },100)
 
                 },
