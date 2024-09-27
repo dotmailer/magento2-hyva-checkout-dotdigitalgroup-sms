@@ -34,6 +34,7 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     protected $listeners = [
         'address_list_updated' => 'update',
+        'check_validation_state' => 'update'
     ];
 
     /**

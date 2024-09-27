@@ -78,6 +78,11 @@
                             wire.$refresh()
                         }
                     });
+
+                    /**
+                     * Run initial shipping phone validation check
+                     */
+                    window.addEventListener('checkout:step:loaded', (event) => wire.emit('check_validation_state'))
                 },
 
                 /**
