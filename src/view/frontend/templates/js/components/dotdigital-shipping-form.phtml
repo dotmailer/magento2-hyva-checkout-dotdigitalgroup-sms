@@ -78,14 +78,6 @@
                             wire.$refresh()
                         }
                     });
-
-                    /**
-                     * This is not ideal, we need to address this in the future.
-                     */
-                    setTimeout(() => {
-                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => wire.$refresh()))
-                    },100)
-
                 },
 
                 /**

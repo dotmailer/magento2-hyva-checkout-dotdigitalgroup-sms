@@ -41,45 +41,23 @@ if (filter_var( $consentConfig->shouldValidatePhoneNumberWithCheckbox(), FILTER_
             () => intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>)
         );
 
-        Magewire.hook('element.updated', (el, component) => {
-            if (component.id === 'checkout.shipping-details.address-form') {
-                intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>);
-            }
-        }, true);
-
         document.addEventListener('alpine:init', () => {
-
-            Alpine.store('intlInputs', {list: new Set([])});
-
             Alpine.directive('intl-input',(el, {modifiers,expression,value}, {effect, cleanup, evaluate}) => {
-
-                const parent = el.closest('.intl-input-wrapper');
                 const config = {
                     ...<?= $telephoneInputConfig->getConfig(); ?>,
                     ... (expression) ? evaluate( expression ) : []
                 };
 
                 effect(() => {
-
                     if (!window.intlTelInput) return console.warn('intlTelInput is not loaded')
                     if (!window.intlTelInputGlobals) return console.warn('intlTelInputGlobals is not loaded')
-                    window.intlTelInput(el, config);
-
-                    if (el.id
-                        && parent
-                        && Alpine.store('intlInputs').list.has(el.id)
-                        && el.getAttribute('data-intl-tel-input-id') !== null
-                    ) {
-                        const flagContainers = parent.querySelectorAll('.iti__flag-container');
-                        if(flagContainers.length > 1 ) flagContainers[0].style.display = 'none';
-                    }
-                    if(el.id) Alpine.store('intlInputs').list.add(el.id)
-                },[]);
+                    if (!el.id) return console.warn('Element ID is required');
+                    intlInput(`#${el.id}`, config, [], false);
+                },[el.id]);
 
                 cleanup(() => {
                     delete window.intlTelInput(el);
                     delete el.intlTelInput;
-                    if( el.id ) Alpine.store('intlInputs').list.delete(el.id)
                 });
 
             });
