@@ -2,6 +2,7 @@
 
 /** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm $magewire */
 /** @var \Dotdigitalgroup\Email\Block\Basket $block */
+/** @var \Magento\Framework\Escaper $escaper */
 
 /**
  * This form is used to collect and validate the shipping information.
@@ -47,10 +48,11 @@
     </div>
     <?php endif; ?>
     <!-- Marketing consent section -->
+    <?php if($magewire->isConsentEnabledAtCheckout()): ?>
     <div class="w-full pb-4 mb-4 mt-3">
         <?= $block->getChildHtml('hyva-checkout-marketing-consent-customer') ?>
     </div>
-
+    <?php endif; ?>
     <!-- Additional JavaScript for the form -->
     <?= $block->getChildHtml('hyva-checkout-sms-form-js') ?>
 

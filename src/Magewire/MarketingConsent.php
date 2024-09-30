@@ -8,11 +8,9 @@ use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magewirephp\Magewire\Component;
 use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent as MarketingConsentViewModel;
-use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
 
 /**
  * Class MarketingConsent
@@ -31,16 +29,6 @@ class MarketingConsent extends Component
     private $marketingConsent;
 
     /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * @var ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
      * @var Session
      */
     private $checkoutSession;
@@ -55,29 +43,10 @@ class MarketingConsent extends Component
      */
     public function __construct(
         MarketingConsentViewModel $marketingConsent,
-        StoreManagerInterface $storeManager,
-        ScopeConfigInterface $scopeConfig,
         Session $checkoutSession
     ) {
         $this->marketingConsent = $marketingConsent;
-        $this->storeManager = $storeManager;
-        $this->scopeConfig = $scopeConfig;
         $this->checkoutSession = $checkoutSession;
-    }
-
-    /**
-     * The boot method is called when the component is initialized.
-     *
-     * @throws LocalizedException
-     */
-    public function boot(): void
-    {
-        $this->isConsentEnabledAtCheckout = (bool) $this->scopeConfig->getValue(
-            ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
-            ScopeInterface::SCOPE_STORES,
-            $this->storeManager->getStore()->getId()
-        );
-        parent::boot();
     }
 
     /**

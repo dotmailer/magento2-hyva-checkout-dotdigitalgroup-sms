@@ -3,6 +3,7 @@
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
 use Dotdigitalgroup\Email\Logger\Logger;
+use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
 use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent;
 use Hyva\Checkout\Model\Magewire\Component\Evaluation\EvaluationResult;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationInterface;
@@ -11,10 +12,13 @@ use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session as SessionCustomer;
 use Magento\Eav\Model\Config as EavConfig;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Magewirephp\Magewire\Component\Form;
 
 /**
@@ -86,28 +90,51 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private $logger;
 
+    /**
+     * @var MarketingConsent
+     */
     private $consent;
 
+    /**
+     * @var EavConfig
+     */
     private $eavConfig;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
      * ShippingForm constructor.
      *
-     * @param SessionCustomer            $sessionCustomer
+     * @param SessionCustomer $sessionCustomer
      * @param AddressRepositoryInterface $addressRepository
-     * @param ResultFactory              $resultFactory
-     * @param CartRepositoryInterface    $quoteRepository
-     * @param Session                    $checkoutSession
+     * @param ResultFactory $resultFactory
+     * @param CartRepositoryInterface $quoteRepository
+     * @param Session $checkoutSession
+     * @param Logger $logger
+     * @param MarketingConsent $marketingConsent
+     * @param EavConfig $eavConfig
+     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
-        SessionCustomer            $sessionCustomer,
+        SessionCustomer $sessionCustomer,
         AddressRepositoryInterface $addressRepository,
-        ResultFactory              $resultFactory,
-        CartRepositoryInterface    $quoteRepository,
-        Session                    $checkoutSession,
-        Logger                     $logger,
-        MarketingConsent           $marketingConsent,
-        EavConfig                  $eavConfig
+        ResultFactory $resultFactory,
+        CartRepositoryInterface $quoteRepository,
+        Session $checkoutSession,
+        Logger $logger,
+        MarketingConsent $marketingConsent,
+        EavConfig $eavConfig,
+        ScopeConfigInterface $scopeConfig,
+        StoreManagerInterface $storeManager
     ) {
         $this->sessionCustomer = $sessionCustomer;
         $this->addressRepository = $addressRepository;
@@ -117,6 +144,8 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->logger = $logger;
         $this->consent = $marketingConsent;
         $this->eavConfig = $eavConfig;
+        $this->scopeConfig = $scopeConfig;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -271,6 +300,20 @@ class ShippingForm extends Form implements EvaluationInterface
         }
 
         return htmlspecialchars(json_encode($validationSet, JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8');
+    }
+
+    /**
+     * The boot method is called when the component is initialized.
+     *
+     * @throws LocalizedException
+     */
+    public function isConsentEnabledAtCheckout(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(
+            ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
+            ScopeInterface::SCOPE_STORES,
+            $this->storeManager->getStore()->getId()
+        );
     }
 
     /**
