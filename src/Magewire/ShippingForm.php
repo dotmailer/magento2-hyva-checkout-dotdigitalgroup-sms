@@ -24,7 +24,6 @@ use Magewirephp\Magewire\Component\Form;
  * It uses the SessionCustomer, AddressRepositoryInterface, ResultFactory, CartRepositoryInterface, and Session classes to manage the shipping form data.
  * The class includes methods for submitting the shipping form, checking if the customer is logged in, evaluating the completion of the form, setting the phone number, updating the validity of the form, and updating the customer address.
  *
- * @package Hyva\CheckoutDotdigitalgroupSms\Magewire
  */
 class ShippingForm extends Form implements EvaluationInterface
 {
@@ -109,8 +108,7 @@ class ShippingForm extends Form implements EvaluationInterface
         Logger                     $logger,
         MarketingConsent           $marketingConsent,
         EavConfig                  $eavConfig
-    )
-    {
+    ) {
         $this->sessionCustomer = $sessionCustomer;
         $this->addressRepository = $addressRepository;
         $this->resultFactory = $resultFactory;
@@ -143,16 +141,14 @@ class ShippingForm extends Form implements EvaluationInterface
             ->getShippingAddress()
             ->getCustomerAddressId();
 
-        if(!empty($this->addressId))
-        {
+        if (!empty($this->addressId)) {
             $this->setPhoneNumber($this->checkoutSession
                 ->getQuote()
                 ->getShippingAddress()
-                ->getTelephone()
-            );
+                ->getTelephone());
         }
 
-        Parent::boot();
+        parent::boot();
     }
 
     /**
@@ -171,13 +167,11 @@ class ShippingForm extends Form implements EvaluationInterface
             ->getShippingAddress()
             ->getCustomerAddressId();
 
-        if(!empty($this->addressId))
-        {
+        if (!empty($this->addressId)) {
             $this->setPhoneNumber($this->checkoutSession
                 ->getQuote()
                 ->getShippingAddress()
-                ->getTelephone()
-            );
+                ->getTelephone());
         }
 
         $this->isValid = false;
@@ -205,8 +199,8 @@ class ShippingForm extends Form implements EvaluationInterface
         $marketingConsent = (bool) array_key_exists('marketingConsent', $data)
             ? true : '';
 
-        $this->updateCustomerAddress($addressId,$addressPhoneNumber);
-        $this->updateCustomerSession($marketingConsent,$marketingConsentPhoneNumber);
+        $this->updateCustomerAddress($addressId, $addressPhoneNumber);
+        $this->updateCustomerSession($marketingConsent, $marketingConsentPhoneNumber);
         $this->updateValidity(true);
         $this->setPhoneNumber($addressPhoneNumber);
     }
@@ -261,7 +255,8 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->ready = true;
     }
 
-    public function getValidationConfig() {
+    public function getValidationConfig()
+    {
 
         $numberRequired = (bool)$this->eavConfig
             ->getAttribute('customer_address', 'telephone')
@@ -271,7 +266,9 @@ class ShippingForm extends Form implements EvaluationInterface
             "validate-phone-number-with-checkbox" => (bool)$this->consent->isPhoneNumberValidationEnabled()
         ];
 
-        if( $numberRequired ) $validationSet['required'] = true;
+        if ($numberRequired) {
+            $validationSet['required'] = true;
+        }
 
         return htmlspecialchars(json_encode($validationSet, JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8');
     }
@@ -287,8 +284,7 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private function updateCustomerAddress(?string $addressId, ?string $phoneNumber)
     {
-        if(!empty($addressId))
-        {
+        if (!empty($addressId)) {
             try {
                 $address = $this->addressRepository->getById($addressId);
                 $address->setTelephone($phoneNumber);
@@ -298,12 +294,13 @@ class ShippingForm extends Form implements EvaluationInterface
             }
         }
 
-        if( is_null($phoneNumber) ) $phoneNumber = '';
+        if (is_null($phoneNumber)) {
+            $phoneNumber = '';
+        }
 
         $quote = $this->checkoutSession->getQuote();
         $quote->getShippingAddress()->setTelephone($phoneNumber);
         $this->quoteRepository->save($quote);
-
     }
 
     /**
@@ -316,7 +313,7 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private function updateCustomerSession(string $marketingConsent, string $phoneNumber)
     {
-        $this->checkoutSession->setData('dd_sms_consent_checkbox',$marketingConsent);
-        $this->checkoutSession->setData('dd_sms_consent_telephone',$phoneNumber);
+        $this->checkoutSession->setData('dd_sms_consent_checkbox', $marketingConsent);
+        $this->checkoutSession->setData('dd_sms_consent_telephone', $phoneNumber);
     }
 }

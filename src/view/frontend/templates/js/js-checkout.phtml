@@ -46,6 +46,7 @@ if (filter_var( $consentConfig->shouldValidatePhoneNumberWithCheckbox(), FILTER_
         );
 
         document.addEventListener('alpine:init', () => {
+
             Alpine.directive('intl-input',(el, {modifiers,expression,value}, {effect, cleanup, evaluate}) => {
                 const config = {
                     ...<?= $telephoneInputConfig->getConfig(); ?>,

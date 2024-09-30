@@ -18,18 +18,18 @@
     wire:id="checkout.shipping-details.shipping-phone.form"
     wire:submit.prevent="shippingFormSubmit"
 >
-    <?php if($magewire->isCustomerLoggedIn()): ?>
-    <!-- Hidden input for the address ID -->
-
+    <?php if ($magewire->isCustomerLoggedIn()): ?>
     <!-- Phone number input section -->
-    <div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4" x-cloak x-show.important="!isValid && addressId">
+    <div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4"
+         x-cloak
+         x-show.important="!isValid && addressId">
 
         <input x-model="addressId" name="addressId" hidden/>
 
         <div class="w-full gap-2 items-center">
             <label for="DotdigitalShippingPhoneNumber"
                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <?= $block->escapeHtml(__('Phone Number')) ?>
+                <?= $escaper->escapeHtml(__('Phone Number')) ?>
             </label>
         </div>
 

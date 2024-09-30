@@ -20,7 +20,6 @@ use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
  * This class is a Magewire component that handles the marketing consent information.
  * It uses the MarketingConsentViewModel to get the marketing consent label, text, stored mobile number, and subscription status.
  *
- * @package Hyva\CheckoutDotdigitalgroupSms\Magewire
  */
 class MarketingConsent extends Component
 {
@@ -78,7 +77,7 @@ class MarketingConsent extends Component
             ScopeInterface::SCOPE_STORES,
             $this->storeManager->getStore()->getId()
         );
-        Parent::boot();
+        parent::boot();
     }
 
     /**
@@ -103,8 +102,6 @@ class MarketingConsent extends Component
         return $this->marketingConsent->getSmsMarketingConsentText();
     }
 
-
-
     /**
      * Get the stored mobile number from the MarketingConsentViewModel.
      *
@@ -123,7 +120,5 @@ class MarketingConsent extends Component
         }
 
         return (string)$phoneNumber;
-
-
     }
 }
