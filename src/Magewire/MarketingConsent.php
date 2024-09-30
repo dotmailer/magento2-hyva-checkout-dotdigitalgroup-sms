@@ -126,15 +126,4 @@ class MarketingConsent extends Component
 
 
     }
-
-    /**
-     * Check if the user is subscribed to marketing consent from the MarketingConsentViewModel.
-     *
-     * @return bool
-     * @throws LocalizedException
-     */
-    public function getIsSubscribed(): bool
-    {
-        return $this->marketingConsent->isSubscribed() ?? false;
-    }
 }
