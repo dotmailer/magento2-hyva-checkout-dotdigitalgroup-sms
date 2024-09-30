@@ -15,7 +15,7 @@
     class="col-span-12 field-wrapper field-type-tel field field-reserved field-telephone md:col-span-6"
     wire:id="checkout.marketing-consent"
     x-data="{
-        marketingConsent: '<?= $magewire->getIsSubscribed() ?>',
+        marketingConsent: false,
         marketingConsentPhoneNumber: '<?= $magewire->getStoredMobileNumber() ?>',
         marketingConsentText: '<?= $magewire->getMarketingConsentText() ?>',
         marketingConsentLabel: '<?= $magewire->getMarketingConsentLabel() ?>',
@@ -30,7 +30,7 @@
                 type="checkbox"
                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 x-model="marketingConsent"
-                <?php if($magewire->getIsSubscribed()): echo 'checked'; endif; ?>>
+                >
             <label
                 for="marketing-consent"
                 class="ms-2 ml-2 mt-2 text-sm font-medium text-gray-900 dark:text-gray-300">
