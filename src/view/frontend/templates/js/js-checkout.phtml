@@ -38,7 +38,11 @@ if (filter_var( $consentConfig->shouldValidatePhoneNumberWithCheckbox(), FILTER_
 
         window.addEventListener(
             'checkout:step:loaded',
-            () => intlInput("input[type='tel']", <?= $telephoneInputConfig->getConfig(); ?>)
+            () => intlInput(
+                "input[type='tel']",
+                <?= $telephoneInputConfig->getConfig(); ?>,
+                <?= $telephoneInputConfig->isRequired() ? json_encode(['required']) : false; ?>
+            )
         );
 
         document.addEventListener('alpine:init', () => {
