@@ -2,7 +2,6 @@
 
 /** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm $magewire */
 /** @var \Dotdigitalgroup\Email\Block\Basket $block */
-/** @var \Magento\Framework\Escaper $escaper */
 
 /**
  * This form is used to collect and validate the shipping information.
@@ -12,48 +11,20 @@
  * The form data is handled by the `initDotdigitalSmsValidationForm` function and the `shippingFormSubmit` method.
  */
 ?>
-<form
-    novalidate
-    x-data="initDotdigitalSmsValidationForm($el, $wire)"
-    @submit.prevent="shippingFormSubmit"
-    wire:id="checkout.shipping-details.shipping-phone.form"
-    wire:submit.prevent="shippingFormSubmit"
->
-    <?php if ($magewire->isCustomerLoggedIn()): ?>
-    <!-- Phone number input section -->
-    <div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4"
-         x-cloak
-         x-show.important="!isValid && addressId">
-
-        <input x-model="addressId" name="addressId" hidden/>
-
-        <div class="w-full gap-2 items-center">
-            <label for="DotdigitalShippingPhoneNumber"
-                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <?= $escaper->escapeHtml(__('Phone Number')) ?>
-            </label>
-        </div>
-
-        <div class="w-full gap-2 items-center">
-            <input
-                name="phoneNumber"
-                id="DotdigitalShippingPhoneNumber"
-                x-disabled="isValid"
-                x-intl-input
-                x-model="phoneNumber"
-                class="block w-full form-input grow renderer-text telephone"
-                data-validate="<?= $magewire->getValidationConfig() ?>"/>
-        </div>
-
-    </div>
+<div  wire:id="checkout.shipping-details.shipping-phone.form">
+    <?php if ($magewire->shouldDisplay()): ?>
+    <form
+        class="dd-hidden"
+        novalidate
+        x-init="initShippingForm($el)"
+        x-data="initDotdigitalSmsValidationForm($el, $wire)"
+        @submit.prevent="shippingFormSubmit"
+        wire:submit.prevent="shippingFormSubmit"
+    >
+        <?= $block->getChildHtml('hyva-checkout-sms-shipping-phone-fields') ?>
+        <?= $block->getChildHtml('hyva-checkout-sms-shipping-consent-fields') ?>
+        <?= $block->getChildHtml('hyva-checkout-sms-form-js') ?>
+    </form>
     <?php endif; ?>
-    <!-- Marketing consent section -->
-    <?php if($magewire->isConsentEnabledAtCheckout()): ?>
-    <div class="w-full pb-4 mb-4 mt-3">
-        <?= $block->getChildHtml('hyva-checkout-marketing-consent-customer') ?>
-    </div>
-    <?php endif; ?>
-    <!-- Additional JavaScript for the form -->
-    <?= $block->getChildHtml('hyva-checkout-sms-form-js') ?>
+</div>
 
-</form>

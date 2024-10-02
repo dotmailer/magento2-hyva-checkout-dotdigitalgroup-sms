@@ -1,10 +1,19 @@
 <script>
 
     /**
+     * Insure the loading class is present on init
+     *
+     * @param element
+     */
+    function initShippingForm(element){
+        element.classList.add('dd-loading')
+    }
+
+    /**
      * This function initializes the shipping form validation.
      *
      * @param {HTMLFormElement} form - The form element to be validated.
-     * @param {LivewireComponent} wire - The Livewire component instance.
+     * @param {Component} wire - The Livewire component instance.
      * @returns {Object} - Returns an object with the form validation methods and properties.
      */
     function initDotdigitalSmsValidationForm(form, wire) {
@@ -12,12 +21,12 @@
         /**
          * This function checks if the selected shipping address is valid.
          *
-         * @param {HTMLFormElement} form - The form element to be validated.
+         * @param {HTMLFormElement} component - The form element to be validated.
          * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the validity of the form.
          */
-        const checkSelectedShippingAddressValidity = async ( form ) => {
+        const checkSelectedShippingAddressValidity = async ( component ) => {
             try {
-                await form.validate()
+                await component.validate()
             } catch (e) {
                 wire.updateValidity(false)
                 await wire.refresh()
@@ -35,30 +44,44 @@
          */
         const collectFormData = (form) => {
             const payload = {}
-            for ([key, value] of  new FormData(form).entries()) {
+            for ([key, value] of new FormData(form).entries()) {
                 payload[key] = value
             }
             return payload
         }
 
-        // Return an object with the form validation methods and properties.
-        return Object.assign(
-            {},
+        return Object.assign({},
             hyva.formValidation(form),
             {
+                isGuestCheckout: wire.entangle('isGuestCheckout'),
                 isValid: wire.entangle('isValid'),
                 phoneNumber: wire.entangle('phoneNumber').defer,
                 addressId: wire.entangle('addressId').defer
             },
             {
-                init(){
+                marketingConsent: false,
+                marketingConsentLabel: wire.entangle('marketingConsentLabel'),
+                marketingConsentText: wire.entangle('marketingConsentText'),
+                marketingConsentPhoneNumber: wire.entangle('marketingConsentPhoneNumber').defer,
+            },
+            {
+                init() {
+
                     /**
                      * Check validity when requested by the server
+                     */
+                    wire.on('validate.phone_number',  () => {
+                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => {
+                            this.$el.classList.remove('dd-hidden')
+                            this.$el.classList.remove('dd-loading')
+                        }))
+                    });
+
+                    /**
+                     * Trigger update event when shipping address is changed.
                      * @see Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm::update
                      */
-                    wire.on('check-validity', () => {
-                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => wire.$refresh()))
-                    });
+                    Magewire.on('shipping_address_activated', (event) => wire.emit('address_list_updated'))
 
                     /**
                      * This step will add a new listener to the navigation to validate and submit the shipping form
@@ -68,21 +91,9 @@
                     hyvaCheckout.navigation.addTask(() => this.shippingFormSubmit(), {stackPosition: 600})
 
                     /**
-                     * This step will refresh the shipping form when the address list is updated.
-                     */
-                    Magewire.hook('element.updated', (el, component) => {
-                        let hasProcessed = false
-                        if (hasProcessed) return
-                        if (component.id === 'checkout.shipping-details.address-list') {
-                            wire.emit('address_list_updated')
-                            wire.$refresh()
-                        }
-                    });
-
-                    /**
                      * Run initial shipping phone validation check
                      */
-                    window.addEventListener('checkout:step:loaded', (event) => wire.emit('check_validation_state'))
+                    window.addEventListener('checkout:step:loaded', (event) => wire.emit('update_details'), {once: true})
                 },
 
                 /**
@@ -101,6 +112,7 @@
                     await wire.shippingFormSubmit(payload)
                     await wire.refresh()
                 }
+
             })
     }
 </script>

@@ -18,8 +18,7 @@ use Magento\Framework\View\Element\Template;
 $telephoneInputConfig = $block->getData('telephoneInputConfig');
 $consentConfig = $block->getData('consentConfig');
 
-if (filter_var( $consentConfig->shouldValidatePhoneNumberWithCheckbox(), FILTER_VALIDATE_BOOLEAN)) { ?>
-
+if (filter_var( $consentConfig->isPhoneNumberValidationEnabled(), FILTER_VALIDATE_BOOLEAN)) { ?>
     <script type="module">
         import '<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::js/intlTelInput.js')) ?>';
         import {
@@ -36,24 +35,16 @@ if (filter_var( $consentConfig->shouldValidatePhoneNumberWithCheckbox(), FILTER_
             }
         );
 
-        window.addEventListener(
-            'checkout:step:loaded',
-            () => intlInput(
-                "input[type='tel']",
-                <?= $telephoneInputConfig->getConfig(); ?>,
-                <?= $telephoneInputConfig->isRequired() ? json_encode(['required']) : false; ?>
-            )
-        );
-
         document.addEventListener('alpine:init', () => {
 
             Alpine.directive('intl-input',(el, {modifiers,expression,value}, {effect, cleanup, evaluate}) => {
-                const config = {
-                    ...<?= $telephoneInputConfig->getConfig(); ?>,
-                    ... (expression) ? evaluate( expression ) : []
-                };
-
                 effect(() => {
+
+                    const config = {
+                        ...<?= $telephoneInputConfig->getConfig(); ?>,
+                        ... (expression) ? evaluate( expression ) : []
+                    };
+
                     if (!window.intlTelInput) return console.warn('intlTelInput is not loaded')
                     if (!window.intlTelInputGlobals) return console.warn('intlTelInputGlobals is not loaded')
                     if (!el.id) return console.warn('Element ID is required');

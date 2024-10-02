@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Hyva\CheckoutDotdigitalgroupSms\Magewire;
 
+use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
 use Magento\Checkout\Model\Session;
+use Magento\Customer\Model\Session as SessionCustomer;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Magewirephp\Magewire\Component;
 use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent as MarketingConsentViewModel;
+use Magewirephp\Magewire\Component\Form;
 
 /**
  * Class MarketingConsent
@@ -19,14 +22,31 @@ use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent as Marketing
  * It uses the MarketingConsentViewModel to get the marketing consent label, text, stored mobile number, and subscription status.
  *
  */
-class MarketingConsent extends Component
+class MarketingConsent extends Form
 {
-    public $isConsentEnabledAtCheckout  = false;
+    protected $listeners = [
+        "update:marketing_consent_details" => "collectDetails"
+    ];
+
+    /**
+     * @var string
+     */
+    public $marketingConsentLabel;
+
+    /**
+     * @var string
+     */
+    public $marketingConsentText;
+
+    /**
+     * @var string
+     */
+    public $marketingConsentPhoneNumber;
 
     /**
      * @var MarketingConsentViewModel
      */
-    private $marketingConsent;
+    private $marketingConsent = false;
 
     /**
      * @var Session
@@ -34,60 +54,123 @@ class MarketingConsent extends Component
     private $checkoutSession;
 
     /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var SessionCustomer
+     */
+    private $sessionCustomer;
+
+
+    /**
      * MarketingConsent constructor.
      *
      * @param MarketingConsentViewModel $marketingConsent
-     * @param StoreManagerInterface $storeManager
+     * @param Session $checkoutSession
      * @param ScopeConfigInterface $scopeConfig
-     * @param Session $session
+     * @param StoreManagerInterface $storeManager
+     * @param SessionCustomer $sessionCustomer
      */
     public function __construct(
         MarketingConsentViewModel $marketingConsent,
-        Session $checkoutSession
+        Session $checkoutSession,
+        ScopeConfigInterface $scopeConfig,
+        StoreManagerInterface $storeManager,
+        SessionCustomer $sessionCustomer,
     ) {
         $this->marketingConsent = $marketingConsent;
         $this->checkoutSession = $checkoutSession;
+        $this->scopeConfig = $scopeConfig;
+        $this->storeManager = $storeManager;
+        $this->sessionCustomer = $sessionCustomer;
     }
 
     /**
-     * Get the marketing consent label from the MarketingConsentViewModel.
+     * The boot method is called when the component is initialized.
      *
-     * @return string
-     * @throws NoSuchEntityException
+     * It checks if the customer is logged in and sets the phone number from the
+     * shipping address in the checkout session
      */
-    public function getMarketingConsentLabel(): string
+    public function boot(): void
     {
-        return $this->marketingConsent->getSmsSignUpText();
+        $this->collectDetails();
+        parent::boot();
     }
 
     /**
-     * Get the marketing consent text from the MarketingConsentViewModel.
+     * Aggregate relative component information.
      *
-     * @return string
-     * @throws NoSuchEntityException
-     */
-    public function getMarketingConsentText(): string
-    {
-        return $this->marketingConsent->getSmsMarketingConsentText();
-    }
-
-    /**
-     * Get the stored mobile number from the MarketingConsentViewModel.
-     *
-     * @return string|null
+     * @return void
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getStoredMobileNumber(): string
+    public function collectDetails(): void
     {
-        $phoneNumber = $this->marketingConsent->getStoredMobileNumber();
+        $this->marketingConsentLabel = $this->marketingConsent->getSmsSignUpText();
+        $this->marketingConsentText = $this->marketingConsent->getSmsMarketingConsentText();
+        $this->marketingConsentPhoneNumber = $this->marketingConsent->getStoredMobileNumber();
+
         if (empty($phoneNumber)) {
-            $phoneNumber = $this->checkoutSession
+            $this->marketingConsentPhoneNumber = $this->checkoutSession
                 ->getQuote()
                 ->getShippingAddress()
                 ->getTelephone();
         }
-
-        return (string)$phoneNumber;
     }
+
+    /**
+     * Save marketing consent on submit
+     *
+     * @param $data
+     * @return void
+     */
+    public function save($data = [])
+    {
+        $marketingConsentPhoneNumber = (string)($data['marketingConsentPhoneNumber'] ?? '');
+        $marketingConsent = (bool)($data['marketingConsent'] ?? false);
+        $this->updateCustomerSession((string)$marketingConsent, $marketingConsentPhoneNumber);
+    }
+
+    /**
+     * Get enabled state for consent and authentication at checkout
+     *
+     * @throws LocalizedException
+     */
+    public function shouldDisplay(): bool
+    {
+        $enabled = $this->scopeConfig->getValue(
+            ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
+            ScopeInterface::SCOPE_STORES,
+            $this->storeManager->getStore()->getId()
+        );
+
+        $addressId = $this->checkoutSession->getQuote()->getShippingAddress()->getCustomerAddressId();
+        $isGuest = !$this->sessionCustomer->isLoggedIn();
+
+        return (($enabled && $isGuest) || !$addressId);
+    }
+
+    /**
+     * Update customer session with keys used in the dotdigital listeners to trigger the
+     * save on the contact mobile number.
+     *
+     * @param string $marketingConsent
+     * @param string $phoneNumber
+     * @return void
+     */
+    private function updateCustomerSession(string $marketingConsent, string $phoneNumber)
+    {
+        $this->checkoutSession->setData('dd_sms_consent_checkbox', $marketingConsent);
+        $this->checkoutSession->setData('dd_sms_consent_telephone', $phoneNumber);
+    }
+
+
+
 }

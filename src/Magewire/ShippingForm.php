@@ -37,18 +37,18 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     protected $listeners = [
         'address_list_updated' => 'update',
-        'check_validation_state' => 'update'
+        'update_details' => 'update'
     ];
-
-    /**
-     *
-     */
-    public $ready = false;
 
     /**
      * @var bool
      */
     public $isValid = false;
+
+    /**
+     * @var bool
+     */
+    public $isGuestCheckout = false;
 
     /**
      * @var string
@@ -59,6 +59,22 @@ class ShippingForm extends Form implements EvaluationInterface
      * @var int
      */
     public $addressId = null;
+
+    /**
+     * @var string
+     */
+    public $marketingConsentLabel;
+
+    /**
+     * @var string
+     */
+    public $marketingConsentText;
+
+    /**
+     * @var string
+     */
+    public $marketingConsentPhoneNumber;
+
 
     /**
      * @var SessionCustomer
@@ -93,7 +109,7 @@ class ShippingForm extends Form implements EvaluationInterface
     /**
      * @var MarketingConsent
      */
-    private $consent;
+    private $marketingConsent;
 
     /**
      * @var EavConfig
@@ -142,7 +158,7 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->quoteRepository = $quoteRepository;
         $this->checkoutSession = $checkoutSession;
         $this->logger = $logger;
-        $this->consent = $marketingConsent;
+        $this->marketingConsent = $marketingConsent;
         $this->eavConfig = $eavConfig;
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -150,62 +166,71 @@ class ShippingForm extends Form implements EvaluationInterface
 
     /**
      * The boot method is called when the component is initialized.
-     * It checks if the customer is logged in and sets the phone number from the shipping address in the checkout session.
      *
-     * @throws NoSuchEntityException
+     * It checks if the customer is logged in and sets the phone number from the
+     * shipping address in the checkout session
      */
     public function boot(): void
     {
-        if (!$this->isCustomerLoggedIn()) {
-            return;
-        }
-
-        $this->phoneNumber = $this->checkoutSession
-            ->getQuote()
-            ->getShippingAddress()
-            ->getTelephone();
-
-        $this->addressId = $this->checkoutSession
-            ->getQuote()
-            ->getShippingAddress()
-            ->getCustomerAddressId();
-
-        if (!empty($this->addressId)) {
-            $this->setPhoneNumber($this->checkoutSession
-                ->getQuote()
-                ->getShippingAddress()
-                ->getTelephone());
-        }
-
+        $this->collectAddressDetails();
+        $this->collectConsentDetails();
         parent::boot();
+    }
+
+    /**
+     * Collect phone number and address id for shipping form additions.
+     *
+     * @return void
+     */
+    public function collectAddressDetails(): void
+    {
+        try {
+            $shippingAddress = $this->checkoutSession->getQuote()->getShippingAddress();
+            $this->addressId = $shippingAddress->getCustomerAddressId();
+
+            if (!empty($this->addressId)) {
+                $this->phoneNumber = $shippingAddress->getTelephone();
+            }
+        } catch ( NoSuchEntityException | LocalizedException $exception )
+        {
+            $this->logger->error($exception);
+        } finally {
+            $this->emit('$refresh');
+        }
+
+    }
+
+
+    /**
+     * Collect marking consent details
+     *
+     * @return void
+     */
+    public function collectConsentDetails()
+    {
+        try {
+            $this->marketingConsentLabel = $this->marketingConsent->getSmsSignUpText();
+            $this->marketingConsentText = $this->marketingConsent->getSmsMarketingConsentText();
+            $this->marketingConsentPhoneNumber = $this->marketingConsent->getStoredMobileNumber();
+
+            if (empty($this->phoneNumber)) {
+                $this->marketingConsentPhoneNumber = $this->phoneNumber;
+            }
+        } catch ( NoSuchEntityException | LocalizedException $exception )
+        {
+            $this->logger->error($exception);
+        }
     }
 
     /**
      * The update method is called when the address list is updated.
      * It updates the phone number and address ID from the shipping address in the checkout session.
      */
-    public function update()
+    public function update(): void
     {
-        $this->phoneNumber = $this->checkoutSession
-            ->getQuote()
-            ->getShippingAddress()
-            ->getTelephone();
-
-        $this->addressId = $this->checkoutSession
-            ->getQuote()
-            ->getShippingAddress()
-            ->getCustomerAddressId();
-
-        if (!empty($this->addressId)) {
-            $this->setPhoneNumber($this->checkoutSession
-                ->getQuote()
-                ->getShippingAddress()
-                ->getTelephone());
-        }
-
         $this->isValid = false;
-        $this->emit('check-validity');
-        $this->emit('$refresh');
+        $this->collectAddressDetails();
+        $this->emit('validate.phone_number');
     }
 
     /**
@@ -219,19 +244,15 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     public function shippingFormSubmit(array $data)
     {
-        $addressId = (string) array_key_exists('addressId', $data)
-            ? $data['addressId'] : '';
-        $addressPhoneNumber = (string) array_key_exists('phoneNumber', $data)
-            ? $data['phoneNumber'] : '';
-        $marketingConsentPhoneNumber = (string) array_key_exists('marketingConsentPhoneNumber', $data)
-            ? $data['marketingConsentPhoneNumber'] : '';
-        $marketingConsent = (bool) array_key_exists('marketingConsent', $data)
-            ? true : '';
+        $addressId = (string)($data['addressId'] ?? '');
+        $addressPhoneNumber = (string)($data['phoneNumber'] ?? '');
+        $marketingConsentPhoneNumber = (string)($data['marketingConsentPhoneNumber'] ?? '');
+        $marketingConsent = (bool)($data['marketingConsent'] ?? false);
 
         $this->updateCustomerAddress($addressId, $addressPhoneNumber);
         $this->updateCustomerSession($marketingConsent, $marketingConsentPhoneNumber);
+        $this->phoneNumber = $addressPhoneNumber;
         $this->updateValidity(true);
-        $this->setPhoneNumber($addressPhoneNumber);
     }
 
     /**
@@ -253,6 +274,10 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     public function evaluateCompletion(EvaluationResultFactory $resultFactory): EvaluationResult
     {
+        if ($this->isGuestCheckout){
+            return $resultFactory->createSuccess();
+        }
+
         if ($this->isValid) {
             return $resultFactory->createSuccess();
         }
@@ -264,16 +289,6 @@ class ShippingForm extends Form implements EvaluationInterface
     }
 
     /**
-     * The setPhoneNumber method sets the phone number.
-     *
-     * @param string|null $phoneNumber
-     */
-    public function setPhoneNumber(?string $phoneNumber): void
-    {
-        $this->phoneNumber = $phoneNumber;
-    }
-
-    /**
      * The updateValidity method updates the validity of the form.
      *
      * @param bool $validity
@@ -281,9 +296,15 @@ class ShippingForm extends Form implements EvaluationInterface
     public function updateValidity($validity = false)
     {
         $this->isValid = $validity;
-        $this->ready = true;
     }
 
+    /**
+     * Get validation configuration for shipping input
+     *
+     * @return string
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getValidationConfig()
     {
 
@@ -292,7 +313,7 @@ class ShippingForm extends Form implements EvaluationInterface
             ->getIsRequired();
 
         $validationSet = [
-            "validate-phone-number-with-checkbox" => (bool)$this->consent->isPhoneNumberValidationEnabled()
+            "validate-phone-number-with-checkbox" => (bool)$this->marketingConsent->isPhoneNumberValidationEnabled()
         ];
 
         if ($numberRequired) {
@@ -303,17 +324,14 @@ class ShippingForm extends Form implements EvaluationInterface
     }
 
     /**
-     * The boot method is called when the component is initialized.
+     * Should display the component.
      *
-     * @throws LocalizedException
+     * @return bool
      */
-    public function isConsentEnabledAtCheckout(): bool
+    public function shouldDisplay(): bool
     {
-        return (bool) $this->scopeConfig->getValue(
-            ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
-            ScopeInterface::SCOPE_STORES,
-            $this->storeManager->getStore()->getId()
-        );
+        $hasAddress = !empty($this->addressId);
+        return $hasAddress;
     }
 
     /**
@@ -332,8 +350,8 @@ class ShippingForm extends Form implements EvaluationInterface
                 $address = $this->addressRepository->getById($addressId);
                 $address->setTelephone($phoneNumber);
                 $this->addressRepository->save($address);
-            } catch (\Exeption $exception) {
-                $this->logger->warning($exception->gerMessage());
+            } catch (NoSuchEntityException | LocalizedException $exception) {
+                $this->logger->warning($exception);
             }
         }
 
