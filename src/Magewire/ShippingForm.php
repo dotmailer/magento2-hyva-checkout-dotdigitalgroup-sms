@@ -178,6 +178,9 @@ class ShippingForm extends Form implements EvaluationInterface
     {
         $this->collectAddressDetails();
         $this->collectConsentDetails();
+
+
+
         parent::boot();
     }
 
@@ -268,7 +271,7 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     public function evaluateCompletion(EvaluationResultFactory $resultFactory): EvaluationResult
     {
-        if ($this->isGuestCheckout){
+        if (!$this->customerSession->isLoggedIn()){
             return $resultFactory->createSuccess();
         }
 
