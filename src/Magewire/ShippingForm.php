@@ -260,16 +260,6 @@ class ShippingForm extends Form implements EvaluationInterface
     }
 
     /**
-     * The isCustomerLoggedIn method checks if the customer is logged in.
-     *
-     * @return bool
-     */
-    public function isCustomerLoggedIn(): bool
-    {
-        return $this->sessionCustomer->isLoggedIn();
-    }
-
-    /**
      * The evaluateCompletion method is called to evaluate the completion of the form.
      * It returns a success result if the form is valid, otherwise it returns an error message.
      *
