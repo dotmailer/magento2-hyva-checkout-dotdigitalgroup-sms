@@ -335,6 +335,23 @@ class ShippingForm extends Form implements EvaluationInterface
     }
 
     /**
+     * Should display the consent component.
+     *
+     * @return bool
+     * @throws NoSuchEntityException
+     */
+    public function shouldDisplayConsent(): bool
+    {
+        $enabled = (bool) $this->scopeConfig->getValue(
+            ConfigInterface::XML_PATH_CONSENT_SMS_CHECKOUT_ENABLED,
+            ScopeInterface::SCOPE_STORES,
+            $this->storeManager->getStore()->getId()
+        );
+
+        return $enabled;
+    }
+
+    /**
      * The updateCustomerAddress method updates the customer address with the provided address ID and phone number.
      * It saves the updated address in the address repository and the shipping address in the quote repository.
      *

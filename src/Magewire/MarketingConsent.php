@@ -154,7 +154,7 @@ class MarketingConsent extends Form
         $addressId = $this->checkoutSession->getQuote()->getShippingAddress()->getCustomerAddressId();
         $isGuest = !$this->sessionCustomer->isLoggedIn();
 
-        return (($enabled && $isGuest) || !$addressId);
+        return ((!$addressId || $isGuest) && $enabled);
     }
 
     /**

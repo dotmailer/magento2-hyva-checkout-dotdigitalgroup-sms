@@ -21,8 +21,14 @@
         @submit.prevent="shippingFormSubmit"
         wire:submit.prevent="shippingFormSubmit"
     >
-        <?= $block->getChildHtml('hyva-checkout-sms-shipping-phone-fields') ?>
-        <?= $block->getChildHtml('hyva-checkout-sms-shipping-consent-fields') ?>
+        <div class="shipping-phone-fields">
+            <?= $block->getChildHtml('hyva-checkout-sms-shipping-phone-fields') ?>
+        </div>
+        <?php if($magewire->shouldDisplayConsent()): ?>
+        <div class="shipping-consent-fields">
+            <?= $block->getChildHtml('hyva-checkout-sms-shipping-consent-fields') ?>
+        </div>
+        <?php endif; ?>
         <?= $block->getChildHtml('hyva-checkout-sms-form-js') ?>
     </form>
     <?php endif; ?>
