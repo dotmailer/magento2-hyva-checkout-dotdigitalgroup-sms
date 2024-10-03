@@ -126,6 +126,8 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private $storeManager;
 
+    private $customerSession;
+
     /**
      * ShippingForm constructor.
      *
@@ -150,7 +152,8 @@ class ShippingForm extends Form implements EvaluationInterface
         MarketingConsent $marketingConsent,
         EavConfig $eavConfig,
         ScopeConfigInterface $scopeConfig,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        SessionCustomer $customerSession
     ) {
         $this->sessionCustomer = $sessionCustomer;
         $this->addressRepository = $addressRepository;
@@ -162,6 +165,7 @@ class ShippingForm extends Form implements EvaluationInterface
         $this->eavConfig = $eavConfig;
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
+        $this->customerSession = $customerSession;
     }
 
     /**
@@ -307,7 +311,6 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     public function getValidationConfig()
     {
-
         $numberRequired = (bool)$this->eavConfig
             ->getAttribute('customer_address', 'telephone')
             ->getIsRequired();

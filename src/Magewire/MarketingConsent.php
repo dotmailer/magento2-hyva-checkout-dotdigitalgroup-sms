@@ -170,7 +170,4 @@ class MarketingConsent extends Form
         $this->checkoutSession->setData('dd_sms_consent_checkbox', $marketingConsent);
         $this->checkoutSession->setData('dd_sms_consent_telephone', $phoneNumber);
     }
-
-
-
 }

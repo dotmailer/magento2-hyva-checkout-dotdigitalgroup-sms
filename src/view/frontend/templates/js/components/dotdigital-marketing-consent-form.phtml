@@ -37,6 +37,7 @@
                     }
 
                     await wire.save(collectFormData(this.$el))
+                    await wire.refresh()
                 }
             })
     }
