@@ -126,6 +126,9 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     private $storeManager;
 
+    /**
+     * @var SessionCustomer
+     */
     private $customerSession;
 
     /**
@@ -141,6 +144,7 @@ class ShippingForm extends Form implements EvaluationInterface
      * @param EavConfig $eavConfig
      * @param ScopeConfigInterface $scopeConfig
      * @param StoreManagerInterface $storeManager
+     * @param SessionCustomer $customerSession
      */
     public function __construct(
         SessionCustomer $sessionCustomer,
@@ -178,9 +182,6 @@ class ShippingForm extends Form implements EvaluationInterface
     {
         $this->collectAddressDetails();
         $this->collectConsentDetails();
-
-
-
         parent::boot();
     }
 
@@ -242,7 +243,8 @@ class ShippingForm extends Form implements EvaluationInterface
 
     /**
      * The shippingFormSubmit method is called when the shipping form is submitted.
-     * It updates the customer address with the provided address ID and phone number, updates the validity of the form to true, and sets the phone number.
+     * It updates the customer address with the provided address ID and phone number, updates the validity of the
+     * form to true, and sets the phone number.
      *
      * @param array $data
      * @return void|null
@@ -326,8 +328,7 @@ class ShippingForm extends Form implements EvaluationInterface
      */
     public function shouldDisplay(): bool
     {
-        $hasAddress = !empty($this->addressId);
-        return $hasAddress;
+        return !empty($this->addressId);
     }
 
     /**
