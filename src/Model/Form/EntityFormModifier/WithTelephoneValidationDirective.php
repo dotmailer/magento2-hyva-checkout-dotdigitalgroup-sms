@@ -14,10 +14,12 @@ use Dotdigitalgroup\Sms\Model\Config\ConfigInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Eav\Model\Config as EavConfig;
 
 class WithTelephoneValidationDirective implements EntityFormModifierInterface
 {
@@ -32,15 +34,23 @@ class WithTelephoneValidationDirective implements EntityFormModifierInterface
     private $storeManager;
 
     /**
+     * @var EavConfig
+     */
+    private $eavConfig;
+
+    /**
      * @param ScopeConfigInterface $scopeConfig
      * @param StoreManagerInterface $storeManager
+     * @param EavConfig $eavConfig
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        EavConfig $eavConfig
     ) {
        $this->scopeConfig = $scopeConfig;
        $this->storeManager = $storeManager;
+       $this->eavConfig = $eavConfig;
     }
 
     /**
@@ -66,6 +76,7 @@ class WithTelephoneValidationDirective implements EntityFormModifierInterface
      * @param EntityFormInterface $form
      * @return EntityFormInterface
      * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function applyTelephoneValidationDirective(EntityFormInterface $form): EntityFormInterface
     {
@@ -76,8 +87,17 @@ class WithTelephoneValidationDirective implements EntityFormModifierInterface
             $this->storeManager->getStore()->getId()
         );
 
+        $numberRequired = (bool)$this->eavConfig
+            ->getAttribute('customer_address', 'telephone')
+            ->getIsRequired();
+
         if($validationEnabled){
             $field->setAttribute('x-intl-input');
+            $field->setValidationRule('validate-phone-number-with-checkbox');
+        }
+
+        if($numberRequired){
+            $field->setValidationRule('required');
         }
 
         return $form;
