@@ -26,7 +26,8 @@
             },
             {
                 init() {
-                    hyvaCheckout.navigation.addTask(() => this.submit(), { stackPosition: 520})
+                    hyvaCheckout.navigation.addTask(() => this.validate())
+                    hyvaCheckout.navigation.addTask(() => this.submit())
                 },
 
                 async submit() {
