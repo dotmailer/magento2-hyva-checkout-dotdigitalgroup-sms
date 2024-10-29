@@ -277,6 +277,10 @@ class ShippingForm extends Form implements EvaluationInterface
             return $resultFactory->createSuccess();
         }
 
+        if (!$this->addressId){
+            return $resultFactory->createSuccess();
+        }
+
         if ($this->isValid) {
             return $resultFactory->createSuccess();
         }
