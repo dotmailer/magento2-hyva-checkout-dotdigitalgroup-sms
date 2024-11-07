@@ -71,7 +71,7 @@
                      * Check validity when requested by the server
                      */
                     wire.on('validate.phone_number', () => {
-                        this.$nextTick(() => checkSelectedShippingAddressValidity(this, wire).finally(() => {
+                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => {
                             this.$el.classList.remove('dd-hidden')
                             this.$el.classList.remove('dd-loading')
                         }))
