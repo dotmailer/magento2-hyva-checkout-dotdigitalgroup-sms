@@ -3,28 +3,23 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="hyva_form_validation"/>
     <body>
-
-        <referenceContainer name="checkout.shipping-details.section" >
+        <referenceContainer name="checkout.shipping-details.section">
             <block name="hyva-checkout-sms-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-shipping-form.phtml">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm</argument>
                 </arguments>
                 <block name="hyva-checkout-sms-shipping-consent-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/marketing-consent.phtml"/>
                 <block name="hyva-checkout-sms-shipping-phone-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/shipping-phone.phtml"/>
-                <block name="hyva-checkout-sms-form-js" template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-shipping-form.phtml"/>
             </block>
         </referenceContainer>
 
-        <referenceContainer name="checkout.shipping-details.section" >
+        <referenceContainer name="checkout.shipping-details.section">
             <block name="hyva-checkout-marketing-consent-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
                 </arguments>
                 <block name="hyva-checkout-sms-consent-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/marketing-consent.phtml"/>
-                <block name="hyva-checkout-sms-consent-js" template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-marketing-consent-form.phtml"/>
             </block>
         </referenceContainer>
-
     </body>
 </page>
-
