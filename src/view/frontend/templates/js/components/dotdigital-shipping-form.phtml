@@ -21,12 +21,12 @@
         /**
          * This function checks if the selected shipping address is valid.
          *
-         * @param {HTMLFormElement} component - The form element to be validated.
+         * @param {HTMLFormElement} form - The form element to be validated.
          * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the validity of the form.
          */
-        const checkSelectedShippingAddressValidity = async ( component ) => {
+        const checkSelectedShippingAddressValidity = async ( form ) => {
             try {
-                await component.validate()
+                await form.validate()
             } catch (e) {
                 wire.updateValidity(false)
                 await wire.refresh()
@@ -70,8 +70,8 @@
                     /**
                      * Check validity when requested by the server
                      */
-                    wire.on('validate.phone_number',  () => {
-                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => {
+                    wire.on('validate.phone_number', () => {
+                        this.$nextTick(() => checkSelectedShippingAddressValidity(this, wire).finally(() => {
                             this.$el.classList.remove('dd-hidden')
                             this.$el.classList.remove('dd-loading')
                         }))
@@ -93,7 +93,7 @@
                     /**
                      * Run initial shipping phone validation check
                      */
-                    window.addEventListener('checkout:step:loaded', (event) => wire.emit('update_details'), {once: true})
+                    window.addEventListener('checkout:init:shipping', (event) => wire.emit('update_details'), {once: true})
                 },
 
                 /**
