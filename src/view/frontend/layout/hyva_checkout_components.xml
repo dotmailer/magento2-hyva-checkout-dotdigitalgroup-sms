@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="hyva_form_validation"/>
+    <body>
+        <referenceContainer name="checkout.shipping-details.section">
+            <block name="hyva-checkout-sms-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-shipping-form.phtml">
+                <arguments>
+                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm</argument>
+                </arguments>
+                <block name="hyva-checkout-sms-shipping-consent-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/marketing-consent.phtml"/>
+                <block name="hyva-checkout-sms-shipping-phone-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/shipping-phone.phtml"/>
+            </block>
+        </referenceContainer>
+
+        <referenceContainer name="checkout.shipping-details.section">
+            <block name="hyva-checkout-marketing-consent-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
+                <arguments>
+                    <argument name="magewire" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent</argument>
+                </arguments>
+                <block name="hyva-checkout-sms-consent-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/marketing-consent.phtml"/>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

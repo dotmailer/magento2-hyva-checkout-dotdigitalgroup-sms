@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="hyva.checkout.api-v1.after">
+            <block name="hyva-checkout-sms-consent-js"
+                   template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-marketing-consent-form.phtml"/>
+            <block name="hyva-checkout-sms-form-js"
+                   template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-shipping-form.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

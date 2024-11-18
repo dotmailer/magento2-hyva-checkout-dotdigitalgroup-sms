@@ -11,4 +11,14 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="Hyva\Checkout\Model\Form\EntityForm\EavAttributeShippingAddressForm">
+        <arguments>
+            <!-- Inject default shipping address entity form modifiers -->
+            <argument name="entityFormModifiers" xsi:type="array">
+                <item name="with_telephone_validation" sortOrder="500" xsi:type="object">Hyva\CheckoutDotdigitalgroupSms\Model\Form\EntityFormModifier\WithTelephoneValidationDirective</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>

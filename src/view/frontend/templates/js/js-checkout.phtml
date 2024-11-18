@@ -1,0 +1,62 @@
+<?php
+
+declare(strict_types=1);
+
+use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent;
+use Dotdigitalgroup\Sms\ViewModel\TelephoneInputConfig;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/**
+ * @var Template $block
+ * @var TelephoneInputConfig $telephoneInputConfig
+ * @var MarketingConsent $consentConfig
+ * @var Escaper $escaper
+ */
+
+// @codingStandardsIgnoreFile
+$telephoneInputConfig = $block->getData('telephoneInputConfig');
+$consentConfig = $block->getData('consentConfig');
+
+if (filter_var( $consentConfig->isPhoneNumberValidationEnabled(), FILTER_VALIDATE_BOOLEAN)) { ?>
+    <script type="module">
+        import '<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::js/intlTelInput.js')) ?>';
+        import {
+            validationRule,
+            intlInput,
+            includeStyle
+        } from '<?= $escaper->escapeJs($block->getViewFileUrl('Hyva_DotdigitalgroupSms::js/intl-input-validation.js')) ?>';
+        includeStyle('<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::css/hyva.css')) ?>');
+
+        window.addEventListener(
+            'alpine:init',
+            () => {
+                hyva.formValidation.addRule( 'validate-phone-number-with-checkbox', validationRule );
+            }
+        );
+
+        document.addEventListener('alpine:init', () => {
+
+            Alpine.directive('intl-input',(el, {modifiers,expression,value}, {effect, cleanup, evaluate}) => {
+                effect(() => {
+
+                    const config = {
+                        ...<?= $telephoneInputConfig->getConfig(); ?>,
+                        ... (expression) ? evaluate( expression ) : []
+                    };
+
+                    if (!window.intlTelInput) return console.warn('intlTelInput is not loaded')
+                    if (!window.intlTelInputGlobals) return console.warn('intlTelInputGlobals is not loaded')
+                    if (!el.id) return console.warn('Element ID is required');
+                    intlInput(`#${el.id}`, config, [], false);
+                },[el.id]);
+
+                cleanup(() => {
+                    delete window.intlTelInput(el);
+                    delete el.intlTelInput;
+                });
+
+            });
+        });
+    </script>
+<?php } ?>

@@ -1,0 +1,37 @@
+<?php
+
+/** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm $magewire */
+/** @var \Dotdigitalgroup\Email\Block\Basket $block */
+
+/**
+ * This form is used to collect and validate the shipping information.
+ * It uses Alpine.js for the front-end and Livewire for the back-end.
+ * The form includes an input for the phone number and a submit button.
+ * The form also includes a hidden input for the address ID and a section for marketing consent.
+ * The form data is handled by the `initDotdigitalSmsValidationForm` function and the `shippingFormSubmit` method.
+ */
+?>
+<div wire:id="checkout.shipping-details.shipping-phone.form">
+    <?php if ($magewire->shouldDisplay()): ?>
+    <form
+        class="dd-hidden"
+        novalidate
+        x-init="initShippingForm($el)"
+        x-data="initDotdigitalSmsValidationForm($el, $wire)"
+        @submit.prevent="shippingFormSubmit"
+        wire:submit.prevent="shippingFormSubmit"
+    >
+        <?php if ($magewire->shouldDisplayRecapture()): ?>
+        <div class="shipping-phone-fields">
+            <?= $block->getChildHtml('hyva-checkout-sms-shipping-phone-fields') ?>
+        </div>
+        <?php endif; ?>
+        <?php if ($magewire->shouldDisplayConsent()): ?>
+        <div class="shipping-consent-fields">
+            <?= $block->getChildHtml('hyva-checkout-sms-shipping-consent-fields') ?>
+        </div>
+        <?php endif; ?>
+    </form>
+    <?php endif; ?>
+</div>
+

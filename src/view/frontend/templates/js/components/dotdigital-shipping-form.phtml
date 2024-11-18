@@ -1,0 +1,118 @@
+<script>
+
+    /**
+     * Insure the loading class is present on init
+     *
+     * @param element
+     */
+    function initShippingForm(element){
+        element.classList.add('dd-loading')
+    }
+
+    /**
+     * This function initializes the shipping form validation.
+     *
+     * @param {HTMLFormElement} form - The form element to be validated.
+     * @param {Component} wire - The Livewire component instance.
+     * @returns {Object} - Returns an object with the form validation methods and properties.
+     */
+    function initDotdigitalSmsValidationForm(form, wire) {
+
+        /**
+         * This function checks if the selected shipping address is valid.
+         *
+         * @param {HTMLFormElement} form - The form element to be validated.
+         * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the validity of the form.
+         */
+        const checkSelectedShippingAddressValidity = async ( form ) => {
+            try {
+                await form.validate()
+            } catch (e) {
+                wire.updateValidity(false)
+                await wire.refresh()
+                return false
+            }
+            wire.updateValidity(true)
+            await wire.refresh()
+        }
+
+        /**
+         * This function collects the form data and returns it as an object.
+         *
+         * @param {HTMLFormElement} form - The form element to collect data from.
+         * @returns {Object} - Returns an object with the form data.
+         */
+        const collectFormData = (form) => {
+            const payload = {}
+            for ([key, value] of new FormData(form).entries()) {
+                payload[key] = value
+            }
+            return payload
+        }
+
+        return Object.assign({},
+            hyva.formValidation(form),
+            {
+                isGuestCheckout: wire.entangle('isGuestCheckout'),
+                isValid: wire.entangle('isValid'),
+                phoneNumber: wire.entangle('phoneNumber').defer,
+                addressId: wire.entangle('addressId').defer
+            },
+            {
+                marketingConsent: false,
+                marketingConsentLabel: wire.entangle('marketingConsentLabel'),
+                marketingConsentText: wire.entangle('marketingConsentText'),
+                marketingConsentPhoneNumber: wire.entangle('marketingConsentPhoneNumber').defer,
+            },
+            {
+                init() {
+
+                    /**
+                     * Check validity when requested by the server
+                     */
+                    wire.on('validate.phone_number', () => {
+                        this.$nextTick(() => checkSelectedShippingAddressValidity(this).finally(() => {
+                            this.$el.classList.remove('dd-hidden')
+                            this.$el.classList.remove('dd-loading')
+                        }))
+                    });
+
+                    /**
+                     * Trigger update event when shipping address is changed.
+                     * @see Hyva\CheckoutDotdigitalgroupSms\Magewire\ShippingForm::update
+                     */
+                    Magewire.on('shipping_address_activated', (event) => wire.emit('address_list_updated'))
+
+                    /**
+                     * This step will add a new listener to the navigation to validate and submit the shipping form
+                     * when the user navigates to the next step.
+                     */
+                    hyvaCheckout.navigation.addTask(() => this.validate(), {stackPosition: 500})
+                    hyvaCheckout.navigation.addTask(() => this.shippingFormSubmit(), {stackPosition: 600})
+
+                    /**
+                     * Run initial shipping phone validation check
+                     */
+                    window.addEventListener('checkout:init:shipping', (event) => wire.emit('update_details'), {once: true})
+                },
+
+                /**
+                 * This method will submit the shipping form.
+                 *
+                 * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the success of the form submission.
+                 */
+                async shippingFormSubmit() {
+                    const payload = collectFormData(this.$el)
+                    try {
+                        await this.validate()
+                    } catch (e) {
+                        return false
+                    }
+
+                    await wire.shippingFormSubmit(payload)
+                    await wire.refresh()
+                }
+
+            })
+    }
+</script>

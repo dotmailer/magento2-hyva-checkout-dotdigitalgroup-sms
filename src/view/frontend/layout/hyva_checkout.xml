@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="after.body.start">
+            <block class="Magento\Framework\View\Element\Template" name="loader.css" template="Hyva_CheckoutDotdigitalgroupSms::css/loader.phtml"/>
+            <block ifconfig="transactional_sms/sms_settings/phone_number_validation"
+                   template="Hyva_CheckoutDotdigitalgroupSms::js/js-checkout.phtml"
+                   name="checkout.international.telephone.input">
+                <arguments>
+                    <argument name="telephoneInputConfig" xsi:type="object">Dotdigitalgroup\Sms\ViewModel\TelephoneInputConfig</argument>
+                    <argument name="consentConfig" xsi:type="object">Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+
+
+    </body>
+</page>
