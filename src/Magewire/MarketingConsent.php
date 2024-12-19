@@ -87,7 +87,7 @@ class MarketingConsent extends Form
         Session $checkoutSession,
         ScopeConfigInterface $scopeConfig,
         StoreManagerInterface $storeManager,
-        SessionCustomer $sessionCustomer,
+        SessionCustomer $sessionCustomer
     ) {
         $this->marketingConsent = $marketingConsent;
         $this->checkoutSession = $checkoutSession;
