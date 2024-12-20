@@ -12,7 +12,6 @@
                 <block name="hyva-checkout-sms-shipping-phone-fields" template="Hyva_CheckoutDotdigitalgroupSms::component/fields/shipping-phone.phtml"/>
             </block>
         </referenceContainer>
-
         <referenceContainer name="checkout.shipping-details.section">
             <block name="hyva-checkout-marketing-consent-form" template="Hyva_CheckoutDotdigitalgroupSms::component/dotdigital-marketing-consent.phtml">
                 <arguments>

@@ -8,5 +8,8 @@
             <block name="hyva-checkout-sms-form-js"
                    template="Hyva_CheckoutDotdigitalgroupSms::js/components/dotdigital-shipping-form.phtml"/>
         </referenceContainer>
+        <referenceBlock name="require-alpine-v3">
+            <block name="Hyva_CheckoutDotdigitalgroupSms"/>
+        </referenceBlock>
     </body>
 </page>

@@ -12,7 +12,8 @@
                 </arguments>
             </block>
         </referenceContainer>
-
-
+        <referenceBlock name="require-alpine-v3">
+            <block name="Hyva_CheckoutDotdigitalgroupSms"/>
+        </referenceBlock>
     </body>
 </page>
