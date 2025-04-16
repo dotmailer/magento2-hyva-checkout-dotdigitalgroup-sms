@@ -2,25 +2,27 @@
 /** @var \Magento\Framework\Escaper $escaper */
 /** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent $magewire */
 ?>
-<div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4"
-     x-style="display: none"
-     x-show.important="!isValid && addressId">
-    <input x-model="addressId" name="addressId" hidden/>
-    <div class="w-full gap-2 items-center">
-        <label for="DotdigitalShippingPhoneNumber"
-               class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            <?= $escaper->escapeHtml(__('Phone Number')) ?>
-        </label>
-    </div>
+<div x-data="DotdigitalShippingFormFields">
+    <div class="intl-input-wrapper flex flex-col items-center gap-4 pt-4"
+         x-style="styleHideShippingFieldSet"
+         x-show.important="showFields">
+        <input :value="addressId" @change="addressIdChangeEvent" name="addressId" hidden/>
+        <div class="w-full gap-2 items-center">
+            <label for="DotdigitalShippingPhoneNumber"
+                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <?= $escaper->escapeHtml(__('Phone Number')) ?>
+            </label>
+        </div>
 
-    <div class="w-full gap-2 items-center">
-        <input
-            name="phoneNumber"
-            id="DotdigitalShippingPhoneNumber"
-            x-disabled="isValid"
-            x-intl-input
-            x-model="phoneNumber"
-            class="block w-full form-input grow renderer-text telephone"
-            data-validate="<?=  $escaper->escapeHtml($magewire->getValidationConfig()) ?>"/>
+        <div class="w-full gap-2 items-center">
+            <input
+                name="phoneNumber"
+                id="DotdigitalShippingPhoneNumber"
+                x-disabled="isShippingPhoneDisabled"
+                x-intl-input
+                :value="phoneNumber" @change="inputChangeEvent"
+                class="block w-full form-input grow renderer-text telephone"
+                data-validate="<?= $escaper->escapeHtml($magewire->getValidationConfig()) ?>"/>
+        </div>
     </div>
 </div>

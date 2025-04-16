@@ -13,25 +13,24 @@
 ?>
 <div wire:id="checkout.shipping-details.shipping-phone.form">
     <?php if ($magewire->shouldDisplay()): ?>
-    <form
-        class="dd-hidden"
-        novalidate
-        x-init="initShippingForm($el)"
-        x-data="initDotdigitalSmsValidationForm($el, $wire)"
-        @submit.prevent="shippingFormSubmit"
-        wire:submit.prevent="shippingFormSubmit"
-    >
-        <?php if ($magewire->shouldDisplayRecapture()): ?>
-        <div class="shipping-phone-fields">
-            <?= $block->getChildHtml('hyva-checkout-sms-shipping-phone-fields') ?>
-        </div>
-        <?php endif; ?>
-        <?php if ($magewire->shouldDisplayConsent()): ?>
-        <div class="shipping-consent-fields">
-            <?= $block->getChildHtml('hyva-checkout-sms-shipping-consent-fields') ?>
-        </div>
-        <?php endif; ?>
-    </form>
+        <form
+            class="dd-hidden"
+            novalidate
+            x-data="DotdigitalShippingForm"
+            @submit.prevent="shippingFormSubmit"
+            wire:submit.prevent="shippingFormSubmit"
+        >
+            <?php if ($magewire->shouldDisplayRecapture()): ?>
+                <div class="shipping-phone-fields">
+                    <?= $block->getChildHtml('hyva-checkout-sms-shipping-phone-fields') ?>
+                </div>
+            <?php endif; ?>
+            <?php if ($magewire->shouldDisplayConsent()): ?>
+                <div class="shipping-consent-fields">
+                    <?= $block->getChildHtml('hyva-checkout-sms-shipping-consent-fields') ?>
+                </div>
+            <?php endif; ?>
+        </form>
     <?php endif; ?>
 </div>
 

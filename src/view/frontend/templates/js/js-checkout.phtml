@@ -6,12 +6,14 @@ use Dotdigitalgroup\Sms\ViewModel\Customer\Account\MarketingConsent;
 use Dotdigitalgroup\Sms\ViewModel\TelephoneInputConfig;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
+use Hyva\Theme\ViewModel\HyvaCsp;
 
 /**
  * @var Template $block
  * @var TelephoneInputConfig $telephoneInputConfig
  * @var MarketingConsent $consentConfig
  * @var Escaper $escaper
+ * @var HyvaCsp $hyvaCsp
  */
 
 // @codingStandardsIgnoreFile
@@ -22,22 +24,86 @@ if (filter_var( $consentConfig->isPhoneNumberValidationEnabled(), FILTER_VALIDAT
     <script type="module">
         import '<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::js/intlTelInput.js')) ?>';
         import {
+            DotdigitalMarketingConsentFormComponent,
+            DotdigitalMarketingConsentFormFieldsComponent,
+            DotdigitalShippingFormComponent,
+            DotdigitalShippingFormFieldsComponent
+        } from '<?= $block->getViewFileUrl('Hyva_CheckoutDotdigitalgroupSms::js/components.js') ?>';
+        import {
             validationRule,
             intlInput,
             includeStyle
         } from '<?= $escaper->escapeJs($block->getViewFileUrl('Hyva_DotdigitalgroupSms::js/intl-input-validation.js')) ?>';
         includeStyle('<?= $escaper->escapeJs($block->getViewFileUrl('Dotdigitalgroup_Sms::css/hyva.css')) ?>');
 
+        /**
+         * Initialize the validation rule for the phone number input
+         */
         window.addEventListener(
             'alpine:init',
             () => {
                 hyva.formValidation.addRule( 'validate-phone-number-with-checkbox', validationRule );
-            }
+            }, {once: true}
         );
 
+        /**
+         * Initialize the Alpine component for the marketing consent form
+         *
+         * @component DotdigitalMarketingConsentForm - The Alpine component for the marketing consent form
+         * @component DotdigitalMarketingConsentFormFields - The Alpine component for the marketing consent form fields
+         * @component DotdigitalShippingForm - The Alpine component for the shipping form
+         * @component DotdigitalShippingFormFields - The Alpine component for the shipping form fields
+         */
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('DotdigitalMarketingConsentForm', DotdigitalMarketingConsentFormComponent);
+            Alpine.data('DotdigitalMarketingConsentFormFields', DotdigitalMarketingConsentFormFieldsComponent);
+            Alpine.data('DotdigitalShippingForm', DotdigitalShippingFormComponent)
+            Alpine.data('DotdigitalShippingFormFields', DotdigitalShippingFormFieldsComponent)
+        });
+
+        /**
+         * Extend Alpine with custom directives and magic properties
+         *
+         * @property {function} dotdigitalFormDataCollection - Collect form data into an object
+         * @property {function} intl-input - Initialize intlTelInput on an input element
+         */
         document.addEventListener('alpine:init', () => {
 
-            Alpine.directive('intl-input',(el, {modifiers,expression,value}, {effect, cleanup, evaluate}) => {
+            /**
+             * This function collects the form data and returns it as an object.
+             *
+             * @param {HTMLFormElement} form - The form element to collect data from.
+             * @returns {Object} - Returns an object with the form data.
+             */
+            Alpine.magic('dotdigitalFormDataCollection', () => subject => {
+                const payload = {};
+                const formDataEntries = [...new FormData(subject).entries()];
+                for (const [key, value] of formDataEntries) {
+                    payload[key] = value;
+                }
+                return payload;
+            })
+
+            /**
+             * This function checks if the selected shipping address is valid.
+             *
+             * @param {HTMLFormElement} form - The form element to be validated.
+             * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating the validity of the form.
+             */
+            const checkSelectedShippingAddressValidity = async (form) => {
+
+            }
+
+            /**
+             * This directive initializes intlTelInput on an input element.
+             *
+             * @param {HTMLElement} el - The input element to initialize intlTelInput on.
+             * @param {String} expression - The expression passed to the directive.
+             * @param {Function} effect - The effect function to run when the directive is initialized.
+             * @param {Function} cleanup - The cleanup function to run when the directive is removed.
+             * @param {Function} evaluate - The evaluate function to run when the directive is evaluated.
+             */
+            Alpine.directive('intl-input',(el, {expression}, {effect, cleanup, evaluate}) => {
                 effect(() => {
 
                     const config = {
@@ -58,5 +124,7 @@ if (filter_var( $consentConfig->isPhoneNumberValidationEnabled(), FILTER_VALIDAT
 
             });
         });
+
     </script>
+    <?php $hyvaCsp->registerInlineScript() ?>
 <?php } ?>

@@ -2,6 +2,7 @@
 
 /** @var Hyva\CheckoutDotdigitalgroupSms\Magewire\MarketingConsent $magewire */
 /** @var Magento\Framework\View\Element\Template $block */
+/** @var Hyva\Theme\ViewModel\HyvaCsp $hyvaCsp */
 
 /**
  * This section is used to collect and validate the marketing consent information.
@@ -13,13 +14,13 @@
 
 <div wire:id="checkout.marketing-consent">
     <?php if ($magewire->shouldDisplay()): ?>
-    <form
-        novalidate
-        class="col-span-12 field-wrapper field-type-tel field field-reserved field-telephone md:col-span-6"
-        @submit.prevent="submit"
-        wire:submit.prevent="submit"
-        x-data="initDotdigitalSmsValidation($el, $wire)">
-        <?= $block->getChildHtml('hyva-checkout-sms-consent-fields') ?>
-    </form
+        <form
+            novalidate
+            class="col-span-12 field-wrapper field-type-tel field field-reserved field-telephone md:col-span-6"
+            @submit.prevent="submit"
+            wire:submit.prevent="submit"
+            x-data="DotdigitalMarketingConsentForm">
+            <?= $block->getChildHtml('hyva-checkout-sms-consent-fields') ?>
+        </form>
     <?php endif; ?>
 </div>
