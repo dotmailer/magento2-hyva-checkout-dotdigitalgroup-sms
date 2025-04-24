@@ -1,4 +1,10 @@
+# 1.2.0
+
+### Improvements
+- We refactored our templates and JS for compatibility with Alpine CSP.
+
 # 1.1.0
+
 ### Improvements
 - Merchants can now see the currently installed version of the module at **Reports > Dotdigital > Dashboard**.
 
